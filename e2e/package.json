@@ -1,0 +1,20 @@
+{
+  "name": "zarate-e2e",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node scripts/run-cypress.cjs run",
+    "test:ui": "node scripts/run-cypress.cjs run --spec cypress/e2e/ui.cy.ts",
+    "test:integration": "node scripts/run-cypress.cjs run --spec cypress/e2e/integration.cy.ts",
+    "open": "node scripts/run-cypress.cjs open",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "cypress": "16.1.1",
+    "typescript": "6.0.2",
+    "@types/node": "24.13.3"
+  },
+  "engines": {
+    "node": "^24.0.0 || >=26.0.0"
+  }
+}

@@ -1,0 +1,13 @@
+export type PersonType = 'students' | 'teachers' | 'guardians'
+export type Person = { id: number; user_id: number; status: string; user: { id: number; name: string; email: string | null; phone: string | null; status: string } | null; [key: string]: unknown }
+export type Paged<T> = { data: T[]; meta?: { current_page: number; last_page: number; total: number }; last_page?: number; total?: number }
+export type PersonField = { name: string; label: string; type?: 'date' | 'text' | 'select'; options?: Record<string,string>; required?: boolean; max?: number }
+const documents: PersonField[] = [{ name:'document_type',label:'Tipo de documento',type:'select',required:true,options:{DNI:'DNI',CE:'Carné de extranjería',PASSPORT:'Pasaporte'} },{name:'document_number',label:'Número de documento',required:true,max:30}]
+export const personLabels: Record<string,string> = { ACTIVE:'Activo',INACTIVE:'Inactivo',GRADUATED:'Egresado',WITHDRAWN:'Retirado',ON_LEAVE:'Con licencia' }
+export const personCatalogs: Record<PersonType,{ title: string; singular: string; fields: PersonField[]; statuses: string[]; columns: string[] }> = {
+  students:{title:'Estudiantes',singular:'estudiante',fields:[{name:'student_code',label:'Código de estudiante',required:true,max:40},...documents,{name:'birth_date',label:'Fecha de nacimiento',type:'date'},{name:'gender',label:'Género',type:'select',options:{FEMALE:'Femenino',MALE:'Masculino',OTHER:'Otro',NOT_SPECIFIED:'No especificado'}},{name:'address',label:'Dirección',max:500},{name:'admission_date',label:'Fecha de ingreso',type:'date'}],statuses:['ACTIVE','INACTIVE','GRADUATED','WITHDRAWN'],columns:['student_code','document_number','admission_date']},
+  teachers:{title:'Docentes',singular:'docente',fields:[{name:'teacher_code',label:'Código de docente',required:true,max:40},...documents,{name:'specialty',label:'Especialidad',max:255},{name:'hire_date',label:'Fecha de ingreso',type:'date'}],statuses:['ACTIVE','INACTIVE','ON_LEAVE'],columns:['teacher_code','document_number','specialty','hire_date']},
+  guardians:{title:'Padres / Apoderados',singular:'apoderado',fields:[...documents,{name:'occupation',label:'Ocupación',max:255},{name:'address',label:'Dirección',max:500}],statuses:['ACTIVE','INACTIVE'],columns:['document_number','occupation','students_count']},
+}
+export const familyLabels: Record<string,string> = { FATHER:'Padre',MOTHER:'Madre',GUARDIAN:'Apoderado',GRANDPARENT:'Abuelo/a',OTHER:'Otro' }
+export type Family = { id: number; student_id: number; guardian_id: number; student: { id: number; name: string; student_code: string; status: string }; guardian: { id: number; name: string; status: string }; relationship: string; is_primary: boolean; can_pick_up: boolean; receives_notifications: boolean }

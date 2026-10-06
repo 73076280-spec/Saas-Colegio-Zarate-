@@ -1,0 +1,13 @@
+.git
+.tools
+**/node_modules
+**/vendor
+**/.env
+**/.env.testing
+**/dist
+**/cypress/videos
+**/cypress/screenshots
+**/storage/logs/*
+**/.env*
+!**/.env.example
+!**/.env.testing.example
