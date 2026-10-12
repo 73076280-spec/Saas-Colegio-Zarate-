@@ -1,3 +1,4 @@
+import EmptyState from '../components/EmptyState'
 import { useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { Message } from '../components/Form'
@@ -38,7 +39,7 @@ export default function DocumentsPage({ requestId, studentId, embedded = false }
       <p className="text-sm text-brown-medium">Máximo 2 MiB. Sin archivo se registra únicamente la emisión documental.</p>
       <button disabled={busy} className="institutional-button">Guardar documento</button> <button type="button" disabled={busy} className="institutional-button" onClick={() => setForm(false)}>Cancelar</button>
     </form>}
-    {loading && <p role="status">Cargando documentos…</p>}{data?.data.length === 0 && <p>No hay documentos disponibles.</p>}
+    {loading && <p role="status">Cargando documentos…</p>}{data?.data.length === 0 && <EmptyState>No hay documentos disponibles.</EmptyState>}
     <div className="grid gap-3 sm:grid-cols-2">{data?.data.map(d => <article key={d.id} data-testid="document-card" className="institutional-card space-y-3 p-4">
       <h4 className="font-semibold">{d.document_number} · {d.document_type}</h4><p>{d.student}</p><OfficeBadge value={d.status} /><p>Emisión: {dateLabel(d.issued_at)}</p>
       <p className="break-all">{d.original_filename || 'Sin archivo adjunto'}</p>

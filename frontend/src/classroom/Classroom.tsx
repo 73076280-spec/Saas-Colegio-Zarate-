@@ -1,3 +1,4 @@
+import EmptyState from '../components/EmptyState'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { Message } from '../components/Form'
@@ -70,7 +71,7 @@ export default function Classroom({ course, closed }: { course: number; closed: 
       <button className="mt-3 font-semibold text-brown-medium underline" onClick={() => { setFilter({ id: u.id, title: u.title }); setMaterialPage(1); setLoading(true) }}>Ver materiales</button>
       {actions('course-units', u, units)}
     </article>)}</div>
-    {!loading && units?.data.length === 0 && <p>No hay unidades disponibles.</p>}
+    {!loading && units?.data.length === 0 && <EmptyState>No hay unidades disponibles.</EmptyState>}
     <div data-testid="unit-pagination"><Pager page={units} onPage={p => { setUnitPage(p); setLoading(true) }} /></div>
     <h4 className="my-3 text-lg font-semibold">Materiales{filter ? ' · ' + filter.title : ''}</h4>
     {filter && <button className="institutional-button mb-3" onClick={() => { setFilter(null); setMaterialPage(1); setLoading(true) }}>Todos los materiales</button>}
@@ -82,7 +83,7 @@ export default function Classroom({ course, closed }: { course: number; closed: 
       {m.type === 'FILE' && <button className="institutional-button mt-3 max-w-full break-words" disabled={busy} onClick={() => void download(m)}>Descargar {m.original_filename}</button>}
       {actions('materials', m, materials)}
     </article>)}</div>
-    {!loading && materials?.data.length === 0 && <p>No hay materiales disponibles.</p>}
+    {!loading && materials?.data.length === 0 && <EmptyState>No hay materiales disponibles.</EmptyState>}
     <div data-testid="material-pagination"><Pager page={materials} onPage={p => { setMaterialPage(p); setLoading(true) }} /></div>
   </section>
 }

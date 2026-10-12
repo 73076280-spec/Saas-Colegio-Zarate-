@@ -1,3 +1,4 @@
+import EmptyState from '../components/EmptyState'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api, errorMessage } from '../api/client'
@@ -50,7 +51,7 @@ function RequestsContent({ personal }: { personal: boolean }) {
       <button className="institutional-button" disabled={busy}>Registrar solicitud</button> <button type="button" className="institutional-button" disabled={busy} onClick={() => setForm(false)}>Cancelar</button>
     </form>}
     {loading && <p role="status">Cargando solicitudes…</p>}
-    {data?.data.length === 0 && <p>No hay solicitudes con estos filtros.</p>}
+    {data?.data.length === 0 && <EmptyState>No hay solicitudes con estos filtros.</EmptyState>}
     <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr>{['Código','Estudiante / tipo','Fecha','Estado','Asunto','Responsable','Acciones'].map(h => <th className="p-3" key={h}>{h}</th>)}</tr></thead><tbody>
       {data?.data.map(r => <tr key={r.id} data-testid="request-row" className="border-t border-beige"><td className="p-3">{r.request_code}</td><td className="p-3">{r.student}<br />{r.type}</td><td className="p-3">{dateLabel(r.created_at)}</td><td className="p-3"><OfficeBadge value={r.status} /></td><td className="max-w-xs break-words p-3">{r.subject}</td><td className="p-3">{r.responsible || 'Sin asignar'}</td><td className="p-3"><button className="institutional-button" onClick={() => setSelected(r.id)}>Ver solicitud</button></td></tr>)}
     </tbody></table></div><Pager page={data} onPage={setPage} />

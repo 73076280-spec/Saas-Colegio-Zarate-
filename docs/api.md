@@ -1,6 +1,6 @@
 # API REST final
 
-Inventario del router Laravel: **210 combinaciones método + ruta API**, contando PUT y PATCH por separado y excluyendo HEAD implícito. Las rutas parametrizadas cuentan una vez por método, no una por ID ni una por los veinte tipos de reporte. Fuente: rutas cargadas por Laravel desde backend/routes/api.php, consultadas el 6 de octubre de 2026.
+Inventario del router Laravel: **213 combinaciones método + ruta API**, contando PUT y PATCH por separado y excluyendo HEAD implícito. Las rutas parametrizadas cuentan una vez por método, no una por ID ni una por los veinte tipos de reporte. Fuente: rutas cargadas por Laravel desde backend/routes/api.php, confirmadas el 11 de octubre de 2026. El cierre de Sprint 10 tuvo 210; el refresh visual incorpora únicamente tres rutas de fotos.
 
 Salvo /api/health y login, se requiere sesión Sanctum y contexto institucional; las rutas de negocio además exigen password.changed. La SPA obtiene CSRF en GET /sanctum/csrf-cookie (ruta de Sanctum fuera de este inventario API). Enviar cookies, Accept: application/json y X-XSRF-TOKEN en escrituras. La institución nunca se selecciona mediante un header arbitrario.
 
@@ -22,6 +22,14 @@ La columna de permisos indica el control aplicable; los nombres exactos por cat�
 | GET | /api/v1/auth/me | Sesión Sanctum; login público limitado; cambio de contraseña: usuario autenticado | Identidad autenticada |
 | POST | /api/v1/auth/logout | Sesión Sanctum; login público limitado; cambio de contraseña: usuario autenticado | Invalidar sesión |
 | POST | /api/v1/auth/change-password | Sesión Sanctum; login público limitado; cambio de contraseña: usuario autenticado | Cambiar contraseña |
+
+## Fotos de perfil
+
+| Método | Ruta | Rol / permiso / alcance | Descripción |
+| --- | --- | --- | --- |
+| POST | /api/v1/profile/avatar | profile.update; solo el usuario autenticado | Subir/reemplazar foto propia multipart photo; JPG/JPEG, PNG, WebP, máximo 2 MB y 4096 × 4096 px |
+| DELETE | /api/v1/profile/avatar | profile.update; solo el usuario autenticado | Eliminar foto propia |
+| GET | /api/v1/users/{user}/avatar | UserPolicy.viewAvatar; institución y acceso al perfil/vínculo familiar autorizado | Servir imagen privada sin caché; no expone el almacenamiento |
 
 ## Dashboard
 
@@ -54,7 +62,6 @@ La columna de permisos indica el control aplicable; los nombres exactos por cat�
 | PATCH | /api/v1/materials/{id} | ClassroomPolicy; docente asignado o estudiante aprobado | Actualización / transición |
 | POST | /api/v1/materials/{id}/publish | ClassroomPolicy; docente asignado o estudiante aprobado | Actualización / transición |
 | POST | /api/v1/materials/{id}/archive | ClassroomPolicy; docente asignado o estudiante aprobado | Actualización / transición |
-
 | GET | /api/v1/materials/{id}/download | ClassroomPolicy; docente asignado o estudiante aprobado | Descarga privada autorizada |
 
 ## Assignments
@@ -114,7 +121,6 @@ La columna de permisos indica el control aplicable; los nombres exactos por cat�
 ## Attendance
 
 | Método | Ruta | Rol / permiso / alcance | Descripción |
-
 | --- | --- | --- | --- |
 | GET | /api/v1/courses/{course}/attendance-sessions | AttendancePolicy; docente asignado, consulta propia o familiar vinculado | Sesiones del curso |
 | POST | /api/v1/courses/{course}/attendance-sessions | AttendancePolicy; docente asignado, consulta propia o familiar vinculado | Guardar/cerrar sesión |
@@ -159,7 +165,6 @@ La columna de permisos indica el control aplicable; los nombres exactos por cat�
 ## Documents
 
 | Método | Ruta | Rol / permiso / alcance | Descripción |
-
 | --- | --- | --- | --- |
 | GET | /api/v1/academic-documents | OfficePolicy; permiso por recurso, titular/vínculo o Secretaría | Listado paginado |
 | POST | /api/v1/academic-documents | OfficePolicy; permiso por recurso, titular/vínculo o Secretaría | Creación |
@@ -212,7 +217,6 @@ La columna de permisos indica el control aplicable; los nombres exactos por cat�
 | POST | /api/v1/courses/{id}/close | CoursePolicy / TeacherAssignmentPolicy; gestión o curso propio/aprobado | Actualización / transición |
 | POST | /api/v1/teacher-assignments/{id}/disable | CoursePolicy / TeacherAssignmentPolicy; gestión o curso propio/aprobado | Actualización / transición |
 | GET | /api/v1/teachers/{teacher}/courses | CoursePolicy / TeacherAssignmentPolicy; gestión o curso propio/aprobado | Listado paginado |
-
 | GET | /api/v1/students/{student}/courses | CoursePolicy / TeacherAssignmentPolicy; gestión o curso propio/aprobado | Listado paginado |
 | GET | /api/v1/my/courses | CoursePolicy / TeacherAssignmentPolicy; gestión o curso propio/aprobado | Listado paginado |
 | GET | /api/v1/courses/{id}/students | CoursePolicy / TeacherAssignmentPolicy; gestión o curso propio/aprobado | Estudiantes con matrícula aprobada |
@@ -268,7 +272,6 @@ La columna de permisos indica el control aplicable; los nombres exactos por cat�
 | PUT | /api/v1/students/{person} | Permiso de people/acción; PersonPolicy | Actualización / transición |
 | PATCH | /api/v1/students/{person} | Permiso de people/acción; PersonPolicy | Actualización / transición |
 | POST | /api/v1/students/{person}/disable | Permiso de people/acción; PersonPolicy | Actualización / transición |
-
 | GET | /api/v1/teachers/accounts | Permiso de people/acción; PersonPolicy | Cuentas compatibles |
 | GET | /api/v1/teachers | Permiso de people/acción; PersonPolicy | Listado paginado |
 | POST | /api/v1/teachers | Permiso de people/acción; PersonPolicy | Creación |
@@ -315,7 +318,6 @@ La columna de permisos indica el control aplicable; los nombres exactos por cat�
 | GET | /api/v1/sections/{record} | Permiso del catálogo y acción; AcademicPolicy | Consulta de detalle |
 | PUT | /api/v1/sections/{record} | Permiso del catálogo y acción; AcademicPolicy | Actualización / transición |
 | PATCH | /api/v1/sections/{record} | Permiso del catálogo y acción; AcademicPolicy | Actualización / transición |
-
 | GET | /api/v1/subjects | Permiso del catálogo y acción; AcademicPolicy | Listado paginado |
 | POST | /api/v1/subjects | Permiso del catálogo y acción; AcademicPolicy | Creación |
 | GET | /api/v1/subjects/{record} | Permiso del catálogo y acción; AcademicPolicy | Consulta de detalle |

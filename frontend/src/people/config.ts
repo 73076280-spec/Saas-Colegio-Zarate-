@@ -1,5 +1,5 @@
 export type PersonType = 'students' | 'teachers' | 'guardians'
-export type Person = { id: number; user_id: number; status: string; user: { id: number; name: string; email: string | null; phone: string | null; status: string } | null; [key: string]: unknown }
+export type Person = { id: number; user_id: number; status: string; user: { id: number; name: string; email: string | null; phone: string | null; status: string; avatar_url?: string | null } | null; [key: string]: unknown }
 export type Paged<T> = { data: T[]; meta?: { current_page: number; last_page: number; total: number }; last_page?: number; total?: number }
 export type PersonField = { name: string; label: string; type?: 'date' | 'text' | 'select'; options?: Record<string,string>; required?: boolean; max?: number }
 const documents: PersonField[] = [{ name:'document_type',label:'Tipo de documento',type:'select',required:true,options:{DNI:'DNI',CE:'Carné de extranjería',PASSPORT:'Pasaporte'} },{name:'document_number',label:'Número de documento',required:true,max:30}]

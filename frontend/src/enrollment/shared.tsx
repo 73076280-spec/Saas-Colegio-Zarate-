@@ -1,3 +1,4 @@
+import StatusBadge from '../components/StatusBadge'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { Message } from '../components/Form'
@@ -5,7 +6,7 @@ export type Page<T> = { data:T[]; meta?:{current_page:number;last_page:number}; 
 export type Option = { id:number;name:string;capacity?:number|null;occupied?:number }
 export const enrollmentStates=['DRAFT','PENDING','OBSERVED','APPROVED','REJECTED','CANCELLED']
 export const labels:Record<string,string>={DRAFT:'Borrador',PENDING:'Pendiente',OBSERVED:'Observada',APPROVED:'Aprobada',REJECTED:'Rechazada',ACTIVE:'Activo',INACTIVE:'Inactivo',CLOSED:'Cerrado',CANCELLED:'Cancelada',PAID:'Pagado',OVERDUE:'Vencido'}
-export function Status({value}:{value:string}) { return <span className="rounded-full border border-brown-light bg-beige px-3 py-1 text-xs font-semibold">{labels[value]||value}</span> }
+export function Status({value}:{value:string}) { return <StatusBadge value={value}>{labels[value]||value}</StatusBadge> }
 export function Pager({page,onPage}:{page:Page<unknown>|null;onPage:(n:number)=>void}) {
  const current=page?.meta?.current_page??page?.current_page??1,last=page?.meta?.last_page??page?.last_page??1
  return <div className="my-4 flex flex-wrap items-center gap-4"><button type="button" className="institutional-button" disabled={current<=1} onClick={()=>onPage(current-1)}>Anterior</button><span>Página {current} de {last}</span><button type="button" className="institutional-button" disabled={current>=last} onClick={()=>onPage(current+1)}>Siguiente</button></div>

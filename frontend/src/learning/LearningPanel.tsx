@@ -1,3 +1,4 @@
+import EmptyState from '../components/EmptyState'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { Message, PageHeading } from '../components/Form'
@@ -60,7 +61,7 @@ export default function LearningPanel({ kind, course, parent, gradeMode = false 
     {(form?.mode === 'submission' || form?.mode === 'review') && <SubmissionForm key={form.record?.id ?? 'new'} assignment={parent?.id ?? form.record?.assignment?.id ?? 0} record={form.record} review={form.mode === 'review'} onSaved={saved} onCancel={() => setForm(null)} />}
     {form?.mode === 'score' && parent && <ScoreForm key={form.record?.id ?? 'new'} assessment={parent} record={form.record} onSaved={saved} onCancel={() => setForm(null)} />}
     {loading && <p role="status">Cargando registros…</p>}
-    {!loading && result?.data.length === 0 && <p>No hay registros disponibles.</p>}
+    {!loading && result?.data.length === 0 && <EmptyState>No hay registros disponibles.</EmptyState>}
     {kind === 'scores' ? <div className="institutional-card overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr>{['Estudiante', 'Curso / Periodo', 'Evaluación', 'Nota', 'Observación', 'Acción'].map(t => <th key={t} className="p-3">{t}</th>)}</tr></thead><tbody>{result?.data.map(r => <tr key={r.id} className="border-t border-beige" data-testid="score-row"><td className="p-3">{r.student?.name}</td><td className="p-3">{r.course.name} / {r.period?.name}</td><td className="p-3">{r.assessment?.title}</td><td className="p-3 font-semibold">{r.score}</td><td className="p-3 whitespace-pre-wrap">{r.observations}</td><td className="space-y-2 p-3">{r.abilities.update && gradingOpen && <button className="institutional-button" onClick={() => setForm({ mode: 'score', record: r })}>Modificar nota</button>}<button className="institutional-button" onClick={() => setHistory(r.id)}>Historial</button></td></tr>)}</tbody></table></div> :
       <div className="grid gap-4">{result?.data.map(r => <article key={r.id} className="institutional-card min-w-0 space-y-3" data-testid="learning-card">
         <h3 className="break-words text-lg font-semibold">{r.title ?? r.assignment?.title}</h3><LearningStatus status={r.status} /><p className="text-sm text-brown-medium">{r.course.name}{r.period ? ' · ' + r.period.name : ''}</p>

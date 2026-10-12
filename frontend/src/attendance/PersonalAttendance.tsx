@@ -1,3 +1,4 @@
+import EmptyState from '../components/EmptyState'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { Message } from '../components/Form'
@@ -49,7 +50,7 @@ export default function PersonalAttendance({ family = false }: { family?: boolea
       {links?.data.length === 0 && <p>No tienes estudiantes vinculados.</p>}
     </div>}
     {loading && <p role="status">Cargando asistencia…</p>}
-    {!loading && result?.data.length === 0 && <p>No hay registros de asistencia.</p>}
+    {!loading && result?.data.length === 0 && <EmptyState>No hay registros de asistencia.</EmptyState>}
     <div className="space-y-3">{result?.data.map(r => <article key={r.id} data-testid="personal-attendance" className="institutional-card space-y-2 p-5">
       <h2 className="font-semibold">{r.date} · {r.course}</h2><p>{r.student}</p><AttendanceBadge value={r.status} /><p className="break-words">{r.observations || 'Sin observación'}</p>
       {r.justification && <div>Justificación: <AttendanceBadge value={r.justification.status} />{family && <button className="institutional-button ml-2" onClick={() => setDetail(r.justification!.id)}>Ver justificación</button>}</div>}

@@ -7,6 +7,8 @@ import { Message } from '../components/Form'
 import { familyLabels } from './config'
 import type { Family, Paged } from './config'
 import PeopleLookup from './PeopleLookup'
+import Avatar from '../components/Avatar'
+import EmptyState from '../components/EmptyState'
 export default function FamilyPanel({ path, studentId, own = false }: { path: string; studentId?: number; own?: boolean }) {
   const { user } = useAuth()
   const [page, setPage] = useState(1)
@@ -31,6 +33,7 @@ export default function FamilyPanel({ path, studentId, own = false }: { path: st
     catch (failure) { setError(errorMessage(failure)) } finally { setBusy(false) }
   }
   return <section className="institutional-card mt-6"><h2 className="text-xl font-semibold">{own ? 'Mis relaciones familiares' : studentId ? 'Apoderados asociados' : 'Estudiantes asociados'}</h2>
+    {own && !!result.data?.data.length && <div className="my-5 grid gap-3 sm:grid-cols-2">{result.data.data.map(link => <article className="flex items-center gap-3 rounded-xl border border-beige bg-background-soft p-4" key={link.id}><Avatar name={user?.roles.includes('GUARDIAN') ? link.student.name : link.guardian.name} /><div className="min-w-0"><p className="font-semibold break-words">{user?.roles.includes('GUARDIAN') ? link.student.name : link.guardian.name}</p><p className="mt-1 text-xs text-brown-medium">{link.student.student_code} · {familyLabels[link.relationship]}{link.is_primary ? ' · Principal' : ''}</p></div></article>)}</div>}
     <Message error>{error || result.error}</Message>
     {manage && !editing && <button className="institutional-button my-5" onClick={() => { setGuardian(''); setEditing('new') }}>+ Asociar apoderado</button>}
     {editing && <form onSubmit={save} key={record?.id || 'new'} className="my-5 grid gap-4 rounded-xl border border-beige p-5 sm:grid-cols-2">
@@ -40,7 +43,7 @@ export default function FamilyPanel({ path, studentId, own = false }: { path: st
       <p className="text-sm text-brown-medium sm:col-span-2">Al elegir un nuevo principal se actualizará automáticamente la relación anterior.</p>
       <div className="flex gap-4 sm:col-span-2"><button className="institutional-button" disabled={busy}>Guardar relación</button><button className="underline" type="button" onClick={() => setEditing(null)}>Cancelar</button></div>
     </form>}
-    {result.loading ? <p className="mt-5" role="status">Cargando relaciones…</p> : !result.data?.data.length ? <p className="mt-5 text-sm">Sin relaciones familiares registradas.</p> :
+    {result.loading ? <p className="mt-5" role="status">Cargando relaciones…</p> : !result.data?.data.length ? <EmptyState hint="Aquí aparecerán los vínculos registrados por tu institución.">Sin relaciones familiares registradas.</EmptyState> :
       <div className="mt-5 overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr>{['Estudiante','Apoderado','Parentesco','Principal','Notificaciones','Puede recoger',...(manage?['Acciones']:[])].map(label => <th key={label} className="border-b border-beige p-3">{label}</th>)}</tr></thead><tbody>
         {result.data.data.map(link => <tr key={link.id}><td className="p-3">{link.student.name}</td><td className="p-3">{link.guardian.name}</td><td className="p-3">{familyLabels[link.relationship]}</td><td className="p-3">{link.is_primary?'Sí':'No'}</td><td className="p-3">{link.receives_notifications?'Sí':'No'}</td><td className="p-3">{link.can_pick_up?'Sí':'No'}</td>{manage && <td className="p-3"><div className="flex gap-3"><button className="underline" onClick={() => setEditing(link)}>Editar relación</button><button className="underline" disabled={busy} onClick={() => void detach(link)}>Quitar</button></div></td>}</tr>)}
       </tbody></table></div>}

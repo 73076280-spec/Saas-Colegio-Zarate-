@@ -57,4 +57,9 @@ class User extends Authenticatable
     {
         return trim($this->first_name.' '.$this->last_name);
     }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar_path ? '/api/v1/users/'.$this->id.'/avatar?v='.substr(hash('sha256', $this->avatar_path), 0, 12) : null;
+    }
 }

@@ -1,3 +1,4 @@
+import EmptyState from '../components/EmptyState'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
@@ -36,7 +37,7 @@ function CommunicationsContent() {
   return <section className="space-y-5"><h1 className="text-2xl font-bold">Comunicaciones</h1><Message error>{error || loadError || detailError}</Message>
     {data?.abilities?.create && <button className="institutional-button" onClick={() => { setEditing(null); setForm(true) }}>Nuevo comunicado</button>}
     {form && <CommunicationForm key={editing?.id ?? 'new'} item={editing} cancel={() => setForm(false)} saved={id => { setSelected(id); setForm(false); setRevision(v => v + 1) }} />}
-    {loading && <p role="status">Cargando comunicaciones…</p>}{data?.data.length === 0 && <p>No hay comunicaciones disponibles.</p>}
+    {loading && <p role="status">Cargando comunicaciones…</p>}{data?.data.length === 0 && <EmptyState>No hay comunicaciones disponibles.</EmptyState>}
     <div className="space-y-3">{data?.data.map(item => card(item))}</div><Pager page={data} onPage={setPage} />
     {detailLoading && <p role="status">Cargando comunicado…</p>}{detail && card(detail.data, true)}
   </section>

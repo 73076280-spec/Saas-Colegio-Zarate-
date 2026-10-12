@@ -1,3 +1,4 @@
+import EmptyState from '../components/EmptyState'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { Message } from '../components/Form'
@@ -33,7 +34,7 @@ export default function AttendanceCourse({ course, closed }: { course: number; c
       <label className="block">Tema<input className="institutional-field block w-full" name="topic" maxLength={250} /></label>
       <button className="institutional-button" disabled={busy}>Crear sesión</button>
     </form>}
-    {!loading && result?.data.length === 0 && <p>No hay sesiones de asistencia.</p>}
+    {!loading && result?.data.length === 0 && <EmptyState>No hay sesiones de asistencia.</EmptyState>}
     <div className="grid gap-3 sm:grid-cols-2">{result?.data.map(s => <article key={s.id} className="institutional-card space-y-2 p-4" data-testid="attendance-session">
       <h3 className="font-semibold">{s.date} · {s.topic || 'Sin tema'}</h3><AttendanceBadge value={s.status} />
       <button className="institutional-button block" onClick={() => setSelected(s)}>Abrir asistencia</button>
@@ -69,7 +70,7 @@ function AttendanceRoster({ session, closed, onClose }: { session: Session; clos
   return <section className="institutional-card space-y-4 p-5" data-testid="attendance-roster">
     <h3 className="text-lg font-semibold">Registro del {session.date}</h3><AttendanceBadge value={session.status} />
     <Message error>{error}</Message><Message>{message}</Message>{loading && <p role="status">Cargando estudiantes…</p>}
-    {!loading && result?.data.length === 0 && <p>No hay estudiantes con matrícula aprobada ni registros previos.</p>}
+    {!loading && result?.data.length === 0 && <EmptyState>No hay estudiantes con matrícula aprobada ni registros previos.</EmptyState>}
     {!loading && <form onSubmit={save}><div className="overflow-x-auto"><table className="w-full text-left text-sm">
       <thead><tr><th className="p-2">Estudiante</th><th className="p-2">Asistencia</th><th className="p-2">Observación</th></tr></thead>
       <tbody>{result?.data.map(r => <tr key={r.student_id} className="border-t border-beige"><td className="p-2">{r.student}</td>

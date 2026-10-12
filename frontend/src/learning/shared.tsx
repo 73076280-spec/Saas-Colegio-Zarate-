@@ -1,3 +1,4 @@
+import StatusBadge from '../components/StatusBadge'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { Message } from '../components/Form'
@@ -18,7 +19,7 @@ export type LearningRecord = {
 }
 export type LearningPage = Page<LearningRecord> & { abilities?: Record<string, boolean> }
 export const learningLabels: Record<string, string> = { DRAFT: 'Borrador', PUBLISHED: 'Publicado', CLOSED: 'Cerrado', SUBMITTED: 'Entregada', LATE: 'Tardía', REVIEWED: 'Revisada', RETURNED: 'Devuelta' }
-export function LearningStatus({ status }: { status: string }) { return <span className="institutional-badge">{learningLabels[status] ?? status}</span> }
+export function LearningStatus({ status }: { status: string }) { return <StatusBadge value={status}>{learningLabels[status] ?? status}</StatusBadge> }
 type Option = { id?: number; student_id?: number; name?: string; title?: string; sequence?: number; grading_open?: boolean }
 export function LearningSelect({ label, name, endpoint, value, onChange, optional = false }: {
   label: string; name: string; endpoint: string; value: string; onChange: (v: string) => void; optional?: boolean

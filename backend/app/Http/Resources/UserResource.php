@@ -11,7 +11,7 @@ class UserResource extends JsonResource
     {
         return ['id' => $this->id, 'institution_id' => $this->institution_id,
             'first_name' => $this->first_name, 'last_name' => $this->last_name, 'name' => $this->name,
-            'email' => $this->email, 'phone' => $this->phone, 'avatar_path' => $this->avatar_path,
+            'email' => $this->email, 'phone' => $this->phone, 'avatar_path' => null, 'avatar_url' => $this->avatar_url,
             'status' => $this->status->value, 'must_change_password' => $this->must_change_password,
             'last_login_at' => $this->last_login_at?->toISOString(),
             'roles' => $this->getRoleNames(), 'permissions' => $this->getAllPermissions()->pluck('name')->values(),

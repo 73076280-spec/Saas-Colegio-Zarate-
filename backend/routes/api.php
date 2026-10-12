@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AcademicController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuditController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AvatarController;
 use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EnrollmentController;
@@ -184,6 +185,9 @@ Route::prefix('v1')->group(function () {
             Route::put('/roles/{role}/permissions', [RoleController::class, 'update']);
             Route::apiResource('institutions', InstitutionController::class)->only(['index', 'show', 'update']);
             Route::get('/profile', [ProfileController::class, 'show']);
+            Route::post('/profile/avatar', [AvatarController::class, 'store'])->middleware('throttle:20,1');
+            Route::delete('/profile/avatar', [AvatarController::class, 'destroy']);
+            Route::get('/users/{user}/avatar', [AvatarController::class, 'show'])->whereNumber('user');
             Route::patch('/profile', [ProfileController::class, 'update']);
             Route::get('/audit-logs', [AuditController::class, 'index']);
         });

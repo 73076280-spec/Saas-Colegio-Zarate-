@@ -1,5 +1,7 @@
 # Arquitectura del núcleo SaaS
 
+Documento histórico del núcleo. La arquitectura consolidada de Sprint 10 se encuentra en [architecture.md](architecture.md).
+
 React + TypeScript presenta la interfaz; Laravel valida, autoriza y ejecuta las reglas de negocio sobre MySQL.
 La API REST utiliza Sanctum con cookies y CSRF. Spatie administra roles y permisos por institución.
 

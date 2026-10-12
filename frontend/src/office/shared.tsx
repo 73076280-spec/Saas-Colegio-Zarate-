@@ -1,3 +1,4 @@
+import StatusBadge from '../components/StatusBadge'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { Message } from '../components/Form'
@@ -13,7 +14,7 @@ export type OfficeItem = {
 export type Target = { kind: string; target: string }
 export type OfficePage = Page<OfficeItem> & { abilities?: Record<string, boolean> }
 export const officeLabels: Record<string, string> = { REGISTERED: 'Registrada', IN_REVIEW: 'En revisión', OBSERVED: 'Observada', APPROVED: 'Aprobada', REJECTED: 'Rechazada', COMPLETED: 'Completada', DRAFT: 'Borrador', ISSUED: 'Emitido', CANCELLED: 'Cancelado', PUBLISHED: 'Publicado', ARCHIVED: 'Archivado' }
-export function OfficeBadge({ value }: { value: string }) { return <span className="institutional-badge">{officeLabels[value] ?? value}</span> }
+export function OfficeBadge({ value }: { value: string }) { return <StatusBadge value={value}>{officeLabels[value] ?? value}</StatusBadge> }
 export function dateLabel(value?: string | null) { return value ? new Date(value).toLocaleString('es-PE') : '—' }
 export function useOffice<T>(url: string, revision = 0) {
   const key = url + '|' + revision

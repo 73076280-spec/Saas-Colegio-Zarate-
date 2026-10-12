@@ -1,3 +1,4 @@
+import EmptyState from '../components/EmptyState'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
@@ -30,7 +31,7 @@ export default function JustificationsPage() {
       <button className="institutional-button self-end">Filtrar</button>
     </form>
     {loading && <p role="status">Cargando justificaciones…</p>}
-    {!loading && result?.data.length === 0 && <p>No hay justificaciones con estos filtros.</p>}
+    {!loading && result?.data.length === 0 && <EmptyState>No hay justificaciones con estos filtros.</EmptyState>}
     <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr>{['Estudiante','Fecha','Curso','Motivo','Estado','Acciones'].map(h => <th key={h} className="p-3">{h}</th>)}</tr></thead>
       <tbody>{result?.data.map(j => <tr key={j.id} className="border-t border-beige" data-testid="justification-row">
         <td className="p-3">{j.student}</td><td className="p-3">{j.date}</td><td className="p-3">{j.course}</td><td className="max-w-xs break-words p-3">{j.reason}</td>

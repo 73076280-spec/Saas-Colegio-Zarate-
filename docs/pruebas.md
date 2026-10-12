@@ -1,5 +1,7 @@
 # Pruebas del proyecto
 
+Los resultados y pendientes del cierre de Sprint 10 se registran en [quality-metrics.md](quality-metrics.md). Los comandos de este documento no sustituyen la evidencia de ejecución final.
+
 ## Pest y MySQL
 
 Usar PHP 8.4 y una base MySQL dedicada zarate_test, usuario zarate_test sin acceso a zarate_dev.

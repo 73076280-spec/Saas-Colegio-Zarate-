@@ -29,7 +29,7 @@ Las entidades institucionales contienen institution_id o lo resuelven a través 
 
 No se elimina físicamente el historial de notas, matrículas, solicitudes o justificaciones para corregir estados. Las transiciones registran auditoría; la cancelación no borra la evidencia. Los códigos de solicitud/documento se generan en backend.
 
-Soft deletes se usa donde lo declaran las migraciones/modelos: instituciones, usuarios, años, grados, perfiles personales, matrículas, cursos y tareas. El resto emplea estado o conservación del registro; no debe asumirse borrado lógico universal. Las restricciones únicas y FKs evitan duplicados y referencias inexistentes; Policies y Services verifican además coherencia institucional.
+Soft deletes se usa donde lo declaran las migraciones/modelos: instituciones, usuarios, años, niveles educativos, grados, asignaturas, perfiles personales, matrículas, cursos, unidades, materiales y tareas. El resto emplea estado o conservación del registro; no debe asumirse borrado lógico universal. Las restricciones únicas y FKs evitan duplicados y referencias inexistentes; Policies y Services verifican además coherencia institucional.
 
 ## Pivots e historiales
 

@@ -108,7 +108,9 @@ Los reportes se organizan en Académicos, Matrícula, Asistencia, Calificaciones
 
 Sanctum y CSRF; cuenta e institución activas; cambio obligatorio de contraseña inicial; Policies y scopes institucionales; Form Requests y transacciones; permisos delegables sin escalamiento. Estudiante y apoderado consultan exclusivamente datos propios/vinculados. Archivos privados con MIME y tamaño validados, descarga autorizada y rutas internas ocultas. CSV neutraliza fórmulas. Auditoría e historiales preservan operaciones sin registrar contraseñas ni contenido privado innecesario.
 
-Inventario real: **52 tablas** (incluyendo infraestructura) y **210 endpoints API** por método/ruta, excluyendo HEAD implícito. No se afirma preparación productiva: despliegue, respaldo/restauración y carga real requieren validación específica.
+Inventario real: **52 tablas** (incluyendo infraestructura) y **213 endpoints API** por método/ruta, excluyendo HEAD implícito: 210 del cierre de Sprint 10 y 3 de fotos del refresh visual posterior. No se afirma preparación productiva: despliegue, respaldo/restauración y carga real requieren validación específica.
+
+El [refresh visual](docs/diseno-visual.md) incorpora identidad institucional, fotos propias privadas y tema claro/oscuro persistente por cuenta. El toggle está en el header autenticado; el login permanece claro. No requiere migraciones ni nuevas dependencias.
 
 ## Pruebas y calidad
 

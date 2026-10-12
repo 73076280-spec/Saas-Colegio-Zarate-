@@ -2,7 +2,7 @@ export const roleLabels = { ADMINISTRATOR: 'Administración', SECRETARY: 'Secret
 export type RoleName = keyof typeof roleLabels
 export type User = {
   id: number; institution_id: number; first_name: string; last_name: string; name: string
-  email: string; phone: string | null; avatar_path: string | null
+  email: string; phone: string | null; avatar_path: string | null; avatar_url?: string | null
   status: 'ACTIVE' | 'INACTIVE' | 'BLOCKED'; must_change_password: boolean
   roles: RoleName[]; permissions: string[]
   institution: { id: number; name: string; code: string }

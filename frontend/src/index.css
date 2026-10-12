@@ -1,27 +1,158 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #D98A3A;
-  --color-primary-hover: #E7A55A;
-  --color-beige: #F3E6D3;
-  --color-background-soft: #FAF6EF;
+  --color-primary: #F6A43B;
+  --color-primary-hover: #FFB750;
+  --color-beige: #EDDFCC;
+  --color-background-soft: #FAF8F4;
   --color-white: #FFFFFF;
-  --color-brown-light: #B88A64;
-  --color-brown-medium: #8C6239;
-  --color-text-dark: #3E2F26;
+  --color-brown-light: #C2AC92;
+  --color-brown-medium: #756452;
+  --color-text-dark: #30312F;
+  --color-brand-orange: #E96424;
+  --color-brand-yellow: #FBBB16;
+}
+
+:root, .app-shell {
+  --surface: #FFFFFF;
+  --surface-muted: #FCF8F1;
+  --surface-accent: #FFF0D7;
+  --accent-ink: #95501A;
+  --row-border: #F0EAE1;
+  --state-success-bg: #EDF5EF;
+  --state-success-text: #346449;
+  --state-danger-bg: #FCF0EC;
+  --state-danger-text: #9D4235;
+  --state-warning-bg: #FFF5D9;
+  --state-warning-text: #886019;
+  --shadow-card: 0 8px 28px rgb(62 47 38 / 4%);
+}
+
+.app-shell[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background-soft: #191C20;
+  --color-white: #24282D;
+  --color-beige: #414246;
+  --color-brown-light: #847A6D;
+  --color-brown-medium: #C5B9A8;
+  --color-text-dark: #F4F0E9;
+  --surface: #24282D;
+  --surface-muted: #2B2F34;
+  --surface-accent: #3C3024;
+  --accent-ink: #FFC478;
+  --row-border: #383D43;
+  --state-success-bg: #253B31;
+  --state-success-text: #A7D9B5;
+  --state-danger-bg: #422C2C;
+  --state-danger-text: #FFB6A7;
+  --state-warning-bg: #40371E;
+  --state-warning-text: #F9D686;
+  --shadow-card: 0 8px 28px #0000001A;
+}
+
+/* Shared surfaces inherit theme tokens only inside the authenticated layout. */
+.app-shell, .app-shell header, .app-sidebar, .institutional-card, .metric-card {
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+.app-shell thead, .app-shell dl > div { background: var(--surface-muted); color: var(--color-brown-medium); }
+.app-shell dd { color: var(--color-text-dark); }
+.app-shell td { border-color: var(--row-border); }
+.app-shell tbody tr:hover { background: var(--surface-muted); }
+.app-shell .institutional-card { box-shadow: var(--shadow-card); }
+.app-shell .institutional-button { color: #352613; }
+.app-shell .institutional-button:disabled { color: var(--color-brown-medium); }
+.app-shell .institutional-field:focus { border-color: #EAA64F; box-shadow: 0 0 0 3px #D88B3526; }
+.app-shell .sidebar-link.active { background: var(--surface-accent); color: var(--accent-ink); }
+.app-shell .avatar, .app-shell .metric-icon, .app-shell .empty-state-icon { background: var(--surface-accent); color: var(--accent-ink); }
+.app-shell .profile-banner { background: linear-gradient(110deg,var(--surface-accent),var(--surface)); }
+.app-shell [class*="bg-[#"] { background-color: var(--surface-accent); }
+.app-shell [class*="text-[#"] { color: var(--accent-ink); }
+.app-shell [role="alert"] { background: var(--state-danger-bg); color: var(--state-danger-text); border-color: var(--color-beige); }
+.app-shell div[role="status"] { background: var(--state-success-bg); color: var(--state-success-text); border-color: var(--color-beige); }
+.app-shell .institutional-badge[data-tone="success"] { background: var(--state-success-bg); color: var(--state-success-text); border-color: var(--color-beige); }
+.app-shell .institutional-badge[data-tone="danger"] { background: var(--state-danger-bg); color: var(--state-danger-text); border-color: var(--color-beige); }
+.app-shell .institutional-badge[data-tone="warning"] { background: var(--state-warning-bg); color: var(--state-warning-text); border-color: var(--color-beige); }
+.app-shell[data-theme="dark"] img[alt="Colegios Zárate"] { padding: .55rem; background: #FFFCF5; border-radius: .6rem; }
+.theme-toggle { padding: .65rem; min-width: 2.75rem; }
+.app-shell main > :not(:first-child) { scroll-margin-top: 2rem; }
+.app-shell h1 { font-size: clamp(1.7rem, 2.4vw, 2.15rem); letter-spacing: -.035em; }
+.app-shell h2 { letter-spacing: -.015em; }
+.app-shell table th { padding-top: 1rem; padding-bottom: 1rem; }
+.app-shell table td { padding-top: 1rem; padding-bottom: 1rem; }
+.app-shell fieldset { background: var(--surface-muted); }
+.institutional-button, .button-secondary, .sidebar-link, .avatar {
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+.institutional-button:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 4px 12px #B86C2422; }
+.institutional-button:not(:disabled):active, .button-secondary:not(:disabled):active { transform: translateY(1px); }
+.sidebar-link:hover { transform: translateX(2px); }
+.avatar { box-shadow: 0 0 0 3px var(--surface); }
+.avatar:hover { transform: scale(1.03); }
+.metric-card { padding: 1.5rem; border-top: 3px solid #EFAA42; animation: soft-enter 250ms ease both; }
+.metric-card:nth-child(3n+2) { border-top-color: #D57A50; }
+.metric-card:nth-child(3n+3) { border-top-color: #9DAD7D; }
+.metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.metric-card { transition: transform 180ms ease, box-shadow 180ms ease; }
+.metric-card::after { content: ''; position: absolute; right: -18px; top: -18px; width: 70px; height: 70px; border-radius: 0 50% 0 50%; background: var(--surface-accent); opacity: .55; pointer-events: none; }
+#notification-popover, [role="alert"], [role="dialog"], details[open] > div { animation: soft-enter 180ms ease both; }
+.welcome-panel { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; position: relative; overflow: hidden; padding: 1.75rem 2rem; border: 1px solid var(--color-beige); border-radius: 1.25rem; background: linear-gradient(115deg,var(--surface-accent),var(--surface)); }
+.welcome-symbol { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 5rem; height: 5rem; border-radius: 0 45% 0 45%; background: #F6B624; color: #613E16; transform: rotate(-7deg); }
+.campus-visual { position: relative; overflow: hidden; border-radius: 1.15rem; background: #DAD2C1; }
+.campus-visual img { width: 100%; height: 260px; object-fit: cover; object-position: 65% 48%; }
+.campus-visual::after { content: ''; position: absolute; inset: 40% 0 0; background: linear-gradient(transparent,#192026D9); pointer-events: none; }
+.campus-visual figcaption { position: absolute; z-index: 1; bottom: 1.2rem; left: 1.4rem; right: 1.4rem; display: grid; gap: .3rem; color: #FFF8EF; font-size: .85rem; }
+.campus-label { font-size: .6rem; letter-spacing: .18em; font-weight: 700; color: #FFD18B; }
+.login-hero .campus-visual img { height: 205px; }
+.login-hero h1 { line-height: 1.14; }
+.login-shell { border-top: 4px solid #EFAB37; }
+.empty-art { position: relative; width: 90px; height: 74px; margin-bottom: .75rem; }
+.empty-art > span:first-child, .empty-art > span:nth-child(2) { position: absolute; top: 8px; left: 14px; width: 50px; height: 50px; border: 1px solid var(--color-beige); border-radius: 12px; transform: rotate(-12deg); background: var(--surface); }
+.empty-art > span:nth-child(2) { left: 25px; transform: rotate(12deg); background: var(--surface-accent); }
+.empty-art .empty-state-icon { position: absolute; top: 16px; left: 21px; border: 1px solid var(--color-beige); }
+@keyframes soft-enter { from { opacity: .4; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 639px) { .welcome-panel { padding: 1.3rem; } .welcome-symbol { width: 3rem; height: 3rem; } .campus-visual img { height: 200px; } }
+@media (max-width: 1023px) {
+  .app-sidebar nav { flex-wrap: nowrap; overflow-x: auto; padding: .6rem 0; scrollbar-width: thin; }
+  .app-sidebar .sidebar-group { display: none; }
+  .app-sidebar .sidebar-link { flex-shrink: 0; white-space: nowrap; margin-top: 0; }
+  .app-sidebar > div:first-child { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; padding: 0 0 .75rem; }
+  .app-sidebar > div:first-child img { width: 8rem; }
+  .app-sidebar > div:first-child p { margin-top: 0; max-width: 14rem; }
+}
+@media (max-width: 639px) {
+  .profile-banner { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .profile-banner > .min-w-0 { width: 100%; }
+  .login-hero { padding: 1.5rem; }
+  .login-hero > img { width: 9rem; }
+  .login-hero > .relative.mt-10 { margin-top: 1.4rem; }
+  .login-hero h1 { font-size: 1.65rem; max-width: 19rem; }
+  .login-hero h1 br { display: none; }
+  .login-hero .relative > p:last-child { margin-top: .75rem; line-height: 1.5; }
+  .login-hero > div:last-child { margin-top: 1rem; }
 }
 
 @layer base {
-  body { margin: 0; background: var(--color-background-soft); color: var(--color-text-dark); }
+  body { margin: 0; background: var(--color-background-soft); color: var(--color-text-dark); font-family: 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
   button, input, select, textarea { font: inherit; }
   :focus-visible { outline: 2px solid var(--color-brown-medium); outline-offset: 4px; }
   ::selection { background: var(--color-beige); color: var(--color-text-dark); }
+  button:not(:disabled), select { cursor: pointer; }
+  table { border-collapse: separate; border-spacing: 0; }
+  thead { background: #FBF7F0; color: #695943; }
+  th { font-size: .72rem; font-weight: 650; letter-spacing: .025em; }
+  td { border-bottom: 1px solid #F0EAE1; vertical-align: middle; }
+  tbody tr { transition: background-color .15s; }
+  tbody tr:hover { background: #FFFBF5; }
+  tbody tr:last-child td { border-bottom: 0; }
+  dt { font-weight: 500; }
+  dl > div { padding: .7rem .85rem; border-radius: .75rem; background: #FCFAF6; }
+  p[role="status"]::before { content: ''; display: inline-block; width: .55rem; height: .55rem; margin-right: .6rem; border-radius: 50%; background: #ECA13E; }
 }
 
 @layer components {
   .institutional-card {
     @apply rounded-2xl border border-beige bg-white p-6 sm:p-8;
-    box-shadow: 0 4px 24px rgb(62 47 38 / 3%);
+    box-shadow: 0 5px 22px rgb(62 47 38 / 3%);
   }
   .institutional-button {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-text-dark transition-colors hover:bg-primary-hover disabled:cursor-wait disabled:bg-beige disabled:text-brown-medium motion-reduce:transition-none;
@@ -30,12 +161,40 @@
     @apply inline-flex items-center gap-2 rounded-full border border-beige bg-background-soft px-3 py-1.5 text-xs font-semibold text-brown-medium;
   }
   .institutional-field {
-    @apply min-h-11 w-full rounded-xl border border-brown-light bg-white px-4 py-3 text-text-dark placeholder:text-brown-medium disabled:bg-background-soft;
+    @apply min-h-11 w-full rounded-xl border border-beige bg-white px-4 py-3 text-text-dark placeholder:text-brown-medium disabled:bg-background-soft;
+    transition: border-color .15s, box-shadow .15s;
   }
+  .institutional-field:focus { border-color: #B36C25; box-shadow: 0 0 0 3px #FCEBD5; }
   .institutional-field[aria-invalid="true"] {
     @apply border-brown-medium ring-1 ring-brown-medium;
   }
   .institutional-nav {
     @apply flex min-h-11 items-center gap-3 rounded-xl border border-beige bg-beige px-4 py-3 text-sm font-semibold text-text-dark;
   }
+  .button-secondary { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-beige bg-white px-4 py-2 text-sm font-semibold text-text-dark hover:bg-background-soft disabled:cursor-not-allowed disabled:opacity-50; }
+  .avatar { @apply inline-flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-beige bg-[#FFF0D8] font-semibold text-[#85501C]; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-sm { width: 2.25rem; height: 2.25rem; font-size: .75rem; border-radius: .75rem; }
+  .avatar-md { width: 2.75rem; height: 2.75rem; font-size: .9rem; }
+  .avatar-lg { width: 6rem; height: 6rem; font-size: 1.8rem; border-radius: 1.75rem; }
+  .empty-state { @apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-beige bg-background-soft px-5 py-9 text-center; }
+  .empty-state-icon { @apply mb-4 flex size-12 items-center justify-center rounded-2xl bg-[#FBE8C9] text-brown-medium; }
+  .institutional-badge::before { content: ''; width: .35rem; height: .35rem; border-radius: 50%; background: currentColor; opacity: .65; }
+  .institutional-badge[data-tone="success"] { color: #346449; background: #EDF5EF; border-color: #D5E6D9; }
+  .institutional-badge[data-tone="danger"] { color: #9D4235; background: #FCF0EC; border-color: #F0D6CF; }
+  .institutional-badge[data-tone="warning"] { color: #886019; background: #FFF5D9; border-color: #EFDEAA; }
+  .app-sidebar { @apply border-b border-beige bg-white p-5 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0; }
+  .sidebar-link { @apply flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-brown-medium transition-colors hover:bg-background-soft hover:text-text-dark; }
+  .sidebar-link.active { background: #FFF0D8; color: #854215; box-shadow: inset 3px 0 #E96424; font-weight: 650; }
+  .sidebar-group { @apply mt-5 mb-2 px-3 text-[10px] font-bold uppercase tracking-[.16em] text-brown-medium; }
+  .login-shell { @apply mx-auto grid w-full max-w-[1160px] overflow-hidden rounded-[2rem] border border-beige bg-white lg:grid-cols-[1.12fr_1fr]; box-shadow: 0 24px 80px #7150300D; }
+  .login-hero { @apply relative flex flex-col justify-between overflow-hidden p-8 sm:p-12; background: linear-gradient(145deg, #FFF8E9 10%, #FCE7C3 100%); }
+  .login-hero::before { content: ''; position: absolute; width: 220px; height: 220px; border: 35px solid #F9BA2024; border-radius: 0 50% 0 50%; right: -100px; top: -100px; pointer-events: none; }
+  .metric-card { @apply relative overflow-hidden rounded-2xl border border-beige bg-white p-5; box-shadow: 0 4px 18px #50351004; }
+  .metric-icon { @apply mb-5 inline-flex size-11 items-center justify-center rounded-xl; background: #FFF0D5; color: #99601E; }
+  .metric-card:nth-child(3n+2) .metric-icon { background: #FCE7DD; color: #A85937; }
+  .metric-card:nth-child(3n+3) .metric-icon { background: #EDF2E8; color: #5C7450; }
+  .profile-banner { @apply flex flex-wrap items-center gap-5 rounded-2xl border border-beige p-6; background: linear-gradient(110deg,#FFF3DF,#FFFFFF); }
 }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }

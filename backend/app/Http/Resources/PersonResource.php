@@ -20,7 +20,7 @@ class PersonResource extends JsonResource
         }
         $account = $this->user;
         $data['user'] = $account ? ['id' => $account->id, 'name' => $account->name, 'first_name' => $account->first_name, 'last_name' => $account->last_name,
-            'email' => $private ? $account->email : null, 'phone' => $private ? $account->phone : null, 'status' => $account->status->value] : null;
+            'email' => $private ? $account->email : null, 'phone' => $private ? $account->phone : null, 'status' => $account->status->value, 'avatar_url' => $account->avatar_url] : null;
 
         return $data;
     }

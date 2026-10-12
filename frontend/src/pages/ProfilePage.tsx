@@ -1,4 +1,5 @@
 import OwnPeopleProfile from '../people/OwnPeopleProfile'
+import AvatarEditor from '../components/AvatarEditor'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useAuth } from '../auth/AuthContext'
@@ -18,8 +19,8 @@ export default function ProfilePage() {
       setUser(response.data); setMessage('Perfil actualizado.')
     } catch (failure) { setError(errorMessage(failure)) } finally { setBusy(false) }
   }
-  return <><PageHeading title="Mi perfil" description="Tu información dentro de la comunidad." /><section className="institutional-card max-w-2xl"><Message>{message}</Message><Message error>{error}</Message>
-    <form onSubmit={submit} className="grid gap-5">
+  return <><PageHeading title="Mi perfil" description="Tu información dentro de la comunidad." /><AvatarEditor /><section className="institutional-card"><h2 className="mb-5 text-lg font-semibold">Datos de tu cuenta</h2><Message>{message}</Message><Message error>{error}</Message>
+    <form onSubmit={submit} className="grid gap-5 sm:grid-cols-2">
       <Field label="Nombres" name="first_name" defaultValue={user.first_name} required maxLength={100} />
       <Field label="Apellidos" name="last_name" defaultValue={user.last_name} required maxLength={100} />
       <Field label="Teléfono" name="phone" defaultValue={user.phone || ''} maxLength={30} />
