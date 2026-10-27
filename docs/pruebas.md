@@ -44,11 +44,9 @@ Preparar las cuentas demo una vez, desde backend:
 ```text
 php artisan migrate
 php artisan db:seed --class=DevelopmentSeeder
-php artisan db:seed --class=AcademicDemoSeeder
-php artisan db:seed --class=PeopleDemoSeeder
 ```
 
-Desde Sprint 2 los seeders de permisos conceden permisos de forma aditiva. DevelopmentSeeder reasigna los roles de las cuentas demo; no usarlo para cuentas personalizadas.
+DevelopmentSeeder prepara en local/testing todo el conjunto idempotente de datos demo, incluidos cursos, grados, secciones y matrículas aprobadas. Desde Sprint 2 los seeders de permisos conceden permisos de forma aditiva. DevelopmentSeeder reasigna los roles de las cuentas demo; no usarlo para cuentas personalizadas.
 Desde e2e:
 
 ```text

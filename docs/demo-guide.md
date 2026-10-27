@@ -4,7 +4,7 @@
 
 Iniciar los tres servicios según README. Abrir http://localhost:5173/login y usar siempre localhost. Institución ZARATE; clave inicial ZarateDemo2026! salvo cambio previo. No reseedear ni resetear contraseñas antes de exponer.
 
-Usar el curso DEMO-MAT-2026, el estudiante student@zarate.test y su apoderado guardian@zarate.test. Buscar por nombre/código: los registros E2E acumulados pueden desplazar la demo de la primera página. La demostración usa datos ficticios y consulta registros existentes; cualquier nueva operación debe tener un nombre de prueba reconocible.
+El comando `php artisan db:seed --class=DevelopmentSeeder` prepara los datos completos en local/testing. Usar DEMO-MAT-2026 (1.º A), DEMO-COM-2026 (1.º A), DEMO-CYT-2026 (2.º A) y DEMO-ING-2026 (2.º A). En **Mis cursos**, elegir **Entrar al curso** para abrir una página propia por curso; desde ahí se pueden crear/publicar materiales y unidades, tareas y evaluaciones, registrar notas y asistencia, y consultar entregas y alumnos. Cada curso tiene datos de muestra para probar las pantallas, que operan mediante la API y guardan sus cambios. El docente `teacher@zarate.test` tiene alumnos aprobados en ambos rosters; student2@zarate.test se mantiene observado y no debe aparecer en ellos. El estudiante principal es student@zarate.test y su apoderado guardian@zarate.test. Buscar por nombre/código: los registros E2E acumulados pueden desplazar la demo de la primera página. La demostración usa datos ficticios y consulta registros existentes; cualquier nueva operación debe tener un nombre de prueba reconocible.
 
 ## Recorrido sugerido (14 minutos)
 

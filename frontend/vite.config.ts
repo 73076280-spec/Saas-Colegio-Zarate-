@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     server: {
       host: '0.0.0.0',
+      allowedHosts: ['frontend'],
       port: 5173,
       strictPort: true,
       proxy: {

@@ -113,7 +113,7 @@ Se mantienen naranja #D98A3A, hover #E7A55A, beige #F3E6D3, fondo #FAF6EF, blanc
 ## Seeders y credenciales de desarrollo
 
 DatabaseSeeder crea Colegio Zárate de Huancayo, código ZARATE, roles y permisos.
-DevelopmentSeeder solo funciona en local/testing y crea seis cuentas demo:
+DevelopmentSeeder solo funciona en local/testing. Crea seis cuentas demo y prepara los datos académicos y funcionales ficticios usados por la plataforma:
 
 | Rol | Correo |
 |---|---|
@@ -127,7 +127,7 @@ DevelopmentSeeder solo funciona en local/testing y crea seis cuentas demo:
 Contraseña demo común: `ZarateDemo2026!`. Código: `ZARATE`.
 Son cuentas explícitas de demostración; solo ellas omiten el cambio inicial de contraseña.
 Las cuentas creadas por API sí lo requieren.
-DevelopmentSeeder no reemplaza contraseñas ya modificadas.
+DevelopmentSeeder no reemplaza contraseñas ya modificadas y puede ejecutarse de nuevo para completar datos demo faltantes sin borrar registros.
 Volver a ejecutar los seeders sincroniza roles y restablece sus permisos iniciales; no hacerlo sobre personalizaciones que se deseen conservar.
 No se publican credenciales de MySQL ni APP_KEY.
 

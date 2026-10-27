@@ -43,17 +43,9 @@ php artisan key:generate --env=testing
 php artisan migrate
 php artisan migrate --env=testing
 php artisan db:seed --class=DevelopmentSeeder
-php artisan db:seed --class=AcademicDemoSeeder
-php artisan db:seed --class=PeopleDemoSeeder
-php artisan db:seed --class=EnrollmentDemoSeeder
-php artisan db:seed --class=CourseDemoSeeder
-php artisan db:seed --class=ClassroomDemoSeeder
-php artisan db:seed --class=LearningDemoSeeder
-php artisan db:seed --class=AttendanceDemoSeeder
-php artisan db:seed --class=OfficeDemoSeeder
 ~~~
 
-Los seeders demo solo se permiten en local/testing. No restablecen contraseñas previamente modificadas. No ejecutar migrate:fresh ni reseedear al preparar cada demostración. Sprint 10 no crea tablas ni requiere nuevas dependencias.
+DevelopmentSeeder crea las cuentas y prepara la demo completa: grados, secciones, matrículas aprobadas, cursos del docente y datos relacionados. Los seeders demo solo se permiten en local/testing y son idempotentes; no restablecen contraseñas previamente modificadas. Para una instalación Docker ya migrada, ejecutar desde la raíz `docker compose exec backend php artisan db:seed --class=DevelopmentSeeder`. No ejecutar migrate:fresh ni reseedear al preparar cada demostración. Sprint 10 no crea tablas ni requiere nuevas dependencias.
 
 ## Arranque de la instalación existente
 
@@ -92,11 +84,16 @@ Institución: **ZARATE**. Contraseña inicial: **ZarateDemo2026!**, si no se mod
 | Administrador | administrator@zarate.test |
 | Secretaría | secretary@zarate.test |
 | Tesorería | treasury@zarate.test |
-| Docente | teacher@zarate.test |
+| Docente demo | teacher@zarate.test |
 | Estudiante | student@zarate.test |
+| Estudiante 2 (matrícula observada) | student2@zarate.test |
+| Estudiante 3 | student3@zarate.test |
+| Estudiante 4 | student4@zarate.test |
+| Estudiante 5 | student5@zarate.test |
+| Estudiante 6 | student6@zarate.test |
 | Apoderado | guardian@zarate.test |
 
-El curso DEMO-MAT-2026, los perfiles vinculados y los datos de matrícula, pagos, materiales, tareas, entregas, notas, asistencia, solicitudes y comunicaciones permiten demostrar los procesos. Las pruebas E2E conservan registros identificables; buscar por nombre/código, no asumir que la demo está en la primera página.
+El docente demo tiene cuatro cursos activos (Matemática y Comunicación en 1.º A; Ciencia y Tecnología e Inglés en 2.º A), con estudiantes de matrícula aprobada en ambas secciones. Al entrar en cada curso se pueden gestionar sus propias unidades y materiales, tareas, entregas, evaluaciones, calificaciones y asistencia; las tarjetas y sus indicadores consultan la API y la base de datos. student2@zarate.test conserva una matrícula observada para demostrar que no aparece en el roster. Los perfiles vinculados y los datos de matrícula, pagos, materiales, tareas, entregas, notas, asistencia, solicitudes y comunicaciones permiten demostrar los procesos. Las pruebas E2E conservan registros identificables; buscar por nombre/código, no asumir que la demo está en la primera página.
 
 ## Módulos
 
