@@ -22,12 +22,15 @@ services:
       dockerfile: docker/backend/Dockerfile
     env_file: backend/.env
     environment:
+      APP_ENV: local
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: zarate_dev
       DB_USERNAME: zarate
       DB_PASSWORD: ${MYSQL_PASSWORD:?Completa .env}
+      SANCTUM_STATEFUL_DOMAINS: "${SANCTUM_STATEFUL_DOMAINS:-localhost:5173,127.0.0.1:5173,localhost,127.0.0.1,frontend:5173,frontend}"
+      SESSION_DOMAIN: ${SESSION_DOMAIN:-}
     volumes:
       - ./backend:/var/www/html
       - backend_vendor:/var/www/html/vendor
@@ -108,4 +111,3 @@ volumes:
   mysql_dev:
   backend_vendor:
   frontend_node_modules:
-

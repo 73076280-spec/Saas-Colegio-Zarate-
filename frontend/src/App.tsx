@@ -58,6 +58,7 @@ export default function App() {
         <Route path="my-scores" element={<Protected permission="scores.view"><LearningPanel kind="scores" /></Protected>} />
         <Route path="teacher-assignments" element={<Protected permission="teacher-assignments.view"><TeachingPage kind="teacher-assignments" /></Protected>} />
         <Route path="my-courses" element={<Protected><TeachingPage personal /></Protected>} />
+        <Route path="my-courses/:id" element={<Protected><TeachingPage personal /></Protected>} />
         <Route path="enrollments" element={<Protected><EnrollmentsPage /></Protected>} />
         <Route path="payments" element={<Protected permission="payments.view"><PaymentsPage /></Protected>} />
         <Route path="academic" element={<Protected><AcademicHome /></Protected>} />
