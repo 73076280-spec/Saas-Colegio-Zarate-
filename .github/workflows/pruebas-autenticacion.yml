@@ -1,0 +1,56 @@
+
+name: Pruebas automatizadas de autenticacion - EcoAula
+
+on:
+  push:
+    branches:
+      - feature/pruebas-autenticacion
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  autenticacion:
+    name: Ejecutar pruebas con Pest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar codigo del repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar entorno de pruebas
+        shell: bash
+        run: |
+          cp .env.example .env
+          cp backend/.env.example backend/.env
+          cp backend/.env.testing.example backend/.env.testing
+
+          ROOT_PASS="$(openssl rand -hex 20)"
+          DEV_PASS="$(openssl rand -hex 20)"
+          TEST_ROOT_PASS="$(openssl rand -hex 20)"
+          TEST_PASS="$(openssl rand -hex 20)"
+          APP_KEY="base64:$(openssl rand -base64 32 | tr -d '\n')"
+
+          sed -i "s|^COMPOSE_PROJECT_NAME=.*|COMPOSE_PROJECT_NAME=ecoaula-ci|" .env
+          sed -i "s|^MYSQL_ROOT_PASSWORD=.*|MYSQL_ROOT_PASSWORD=$ROOT_PASS|" .env
+          sed -i "s|^MYSQL_PASSWORD=.*|MYSQL_PASSWORD=$DEV_PASS|" .env
+          sed -i "s|^MYSQL_TEST_ROOT_PASSWORD=.*|MYSQL_TEST_ROOT_PASSWORD=$TEST_ROOT_PASS|" .env
+          sed -i "s|^MYSQL_TEST_PASSWORD=.*|MYSQL_TEST_PASSWORD=$TEST_PASS|" .env
+
+          sed -i "s|^DB_HOST=.*|DB_HOST=mysql|" backend/.env
+          sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=$DEV_PASS|" backend/.env
+
+          sed -i "s|^DB_HOST=.*|DB_HOST=mysql-test|" backend/.env.testing
+          sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=$TEST_PASS|" backend/.env.testing
+          sed -i "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" backend/.env.testing
+
+      
+      - name: Ejecutar pruebas de autenticacion
+        run: |
+          docker compose --profile testing run --rm --build \
+            -v "./backend/.env.testing:/var/www/html/.env:ro" \
+            backend-test sh -c \
+            'php artisan migrate --force && php vendor/bin/pest tests/Feature/Sprint1Test.php tests/Feature/AutenticacionAdicionalTest.php --compact'
