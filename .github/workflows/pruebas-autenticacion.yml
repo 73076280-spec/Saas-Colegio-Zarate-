@@ -47,9 +47,10 @@ jobs:
           sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=$TEST_PASS|" backend/.env.testing
           sed -i "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" backend/.env.testing
 
+      
       - name: Ejecutar pruebas de autenticacion
         run: |
           docker compose --profile testing run --rm --build \
             -v "./backend/.env.testing:/var/www/html/.env:ro" \
             backend-test sh -c \
-            'php artisan migrate --force && php vendor/bin/pest tests/Feature/Sprint1Test.php --compact'
+            'php artisan migrate --force && php vendor/bin/pest tests/Feature/Sprint1Test.php tests/Feature/AutenticacionAdicionalTest.php --compact'
