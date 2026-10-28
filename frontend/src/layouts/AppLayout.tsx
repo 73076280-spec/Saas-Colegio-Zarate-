@@ -11,6 +11,7 @@ import Avatar from '../components/Avatar'
 import Icon, { navigationIcon } from '../components/Icon'
 import ThemeToggle, { savedTheme } from '../components/ThemeToggle'
 import type { Theme } from '../components/ThemeToggle'
+import { canEnterVirtual } from '../virtual/access'
 export default function AppLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -57,6 +58,7 @@ export default function AppLayout() {
     <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:z-10 focus:bg-white focus:p-4">Ir al contenido</a>
     <aside className="app-sidebar">
       <div className="border-b border-beige px-2 pb-5 pt-2"><Brand /><p className="mt-4 text-xs font-medium leading-5 text-brown-medium" data-testid="institution-name">{user.institution.name}</p><p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-[#AE6627]">Campus digital</p></div>
+      {!user.must_change_password && canEnterVirtual(user) && <Link to="/virtual" className="institutional-button my-4 text-center"><Icon name="book" />Ir al Aula Virtual</Link>}
       <nav aria-label="Navegación principal" className="mt-1 flex flex-wrap gap-x-2 lg:block">
         {!user.must_change_password && ['Mi espacio','Vida académica','Gestión y comunidad','Administración'].map(section => {
           const items = visibleLinks.filter(([path]) => group(path) === section)

@@ -27,6 +27,9 @@ import InstitutionPage from './pages/InstitutionPage'
 import RolesPage from './pages/RolesPage'
 import AuditPage from './pages/AuditPage'
 import { Message } from './components/Form'
+import VirtualLayout from './layouts/VirtualLayout'
+import VirtualDashboard from './virtual/VirtualDashboard'
+import { VirtualAccess, VirtualCourse, VirtualSection } from './virtual/VirtualPages'
 function Protected({ children, password = false, permission }: { children: ReactNode; password?: boolean; permission?: string }) {
   const { user, loading, error, refresh } = useAuth()
   if (loading) return <p role="status" className="p-8">Consultando sesión…</p>
@@ -41,6 +44,16 @@ export default function App() {
     <Route path="/" element={<TechnicalPage />} />
     <Route path="*" element={<AuthProvider><Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/virtual" element={<Protected><VirtualAccess><VirtualLayout /></VirtualAccess></Protected>}>
+        <Route index element={<VirtualDashboard />} />
+        <Route path="courses" element={<VirtualSection />} />
+        <Route path="courses/:courseId/:section?" element={<VirtualCourse />} />
+        <Route path="materials" element={<VirtualSection section="materials" />} />
+        <Route path="assignments" element={<VirtualSection section="assignments" />} />
+        <Route path="assessments" element={<VirtualSection section="assessments" />} />
+        <Route path="scores" element={<VirtualSection section="scores" />} />
+        <Route path="*" element={<Navigate to="/virtual" replace />} />
+      </Route>
       <Route path="/app" element={<Protected password><AppLayout /></Protected>}>
         <Route path="reports" element={<Protected><ReportsPage /></Protected>} />
         <Route path="requests" element={<Protected permission="requests.view"><RequestsPage /></Protected>} />

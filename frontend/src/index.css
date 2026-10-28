@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+.virtual-welcome { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 2rem; overflow: hidden; padding: clamp(1.5rem,4vw,3rem); border: 1px solid var(--color-beige); border-radius: 1.5rem; background: linear-gradient(120deg,var(--surface-accent),var(--surface)); }
+.virtual-welcome-art { position: relative; display: grid; place-items: center; width: 180px; height: 180px; flex-shrink: 0; border-radius: 30% 8% 30% 8%; background: #EBA74B; color: #623A17; transform: rotate(-7deg); }
+.virtual-welcome-art > svg { width: 74px; height: 74px; }
+.virtual-welcome-art > span { position: absolute; width: 55px; height: 55px; border-radius: 16px; background: var(--surface); box-shadow: 0 6px 20px #50371812; right: -12px; top: 12px; }
+.virtual-welcome-art > span:last-child { top: auto; bottom: -10px; right: auto; left: -18px; width: 40px; height: 40px; background: #C77E45; }
+.virtual-tool { display: flex; align-items: center; gap: .7rem; padding: 1rem; border: 1px solid var(--color-beige); border-radius: 1rem; background: var(--surface); transition: transform 160ms ease, box-shadow 160ms ease; }
+.virtual-tool:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.virtual-course-card { border-top: 4px solid #D98A3A; }
+.virtual-course-card:nth-child(3n+2) { border-top-color: #B88A64; }
+.virtual-course-card:nth-child(3n+3) { border-top-color: #E8BD67; }
+.virtual-course-icon { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 1rem; background: var(--surface-accent); color: var(--accent-ink); }
+.virtual-shell .app-sidebar nav { flex-wrap: wrap; }
+@media (max-width: 1023px) { .virtual-shell .app-sidebar nav { flex-wrap: nowrap; } }
+@media (max-width: 639px) { .virtual-welcome-art { display: none; } .virtual-shell header > div { min-width: 0; max-width: 100%; } }
+
 @theme {
   --color-primary: #F6A43B;
   --color-primary-hover: #FFB750;

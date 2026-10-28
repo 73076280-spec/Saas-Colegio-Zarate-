@@ -139,6 +139,7 @@ Pest utiliza exclusivamente zarate_test; Cypress necesita MySQL, Laravel :8000 y
 
 ## Documentación final
 
+- [Aula Virtual independiente — Fase 1](docs/aula-virtual-fase-1.md): entrada `/virtual`, misma sesión y rutas institucionales conservadas.
 - [Arquitectura y seguridad](docs/architecture.md).
 - [Modelo de datos](docs/database.md).
 - [API REST](docs/api.md).
