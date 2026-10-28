@@ -8,6 +8,9 @@ import JustificationsPage from './attendance/JustificationsPage'
 import LearningPanel from './learning/LearningPanel'
 import TeachingPage from './courses/TeachingPage'
 import EnrollmentsPage from './enrollment/EnrollmentsPage'
+import EnrollmentLayout from './enrollment/EnrollmentLayout'
+import EnrollmentDashboard from './enrollment/EnrollmentDashboard'
+import EnrollmentCapacity from './enrollment/EnrollmentCapacity'
 import PaymentsPage from './enrollment/PaymentsPage'
 import PeopleHome from './people/PeopleHome'
 import PeoplePage from './people/PeoplePage'
@@ -71,7 +74,13 @@ export default function App() {
         <Route path="my-scores" element={<Protected permission="scores.view"><LearningPanel kind="scores" /></Protected>} />
         <Route path="teacher-assignments" element={<Protected permission="teacher-assignments.view"><TeachingPage kind="teacher-assignments" /></Protected>} />
         <Route path="my-courses" element={<Protected><TeachingPage personal /></Protected>} />
-        <Route path="enrollments" element={<Protected><EnrollmentsPage /></Protected>} />
+        <Route path="enrollments" element={<Protected><EnrollmentLayout /></Protected>}>
+          <Route index element={<EnrollmentDashboard />} />
+          <Route path="list" element={<EnrollmentsPage key="list" />} />
+          <Route path="new" element={<Protected permission="enrollments.create"><EnrollmentsPage key="new" initialCreate /></Protected>} />
+          <Route path="capacity" element={<EnrollmentCapacity />} />
+          <Route path="history" element={<EnrollmentsPage key="history" historyOnly />} />
+        </Route>
         <Route path="payments" element={<Protected permission="payments.view"><PaymentsPage /></Protected>} />
         <Route path="academic" element={<Protected><AcademicHome /></Protected>} />
         <Route path="academic/:catalog" element={<Protected><AcademicPage /></Protected>} />

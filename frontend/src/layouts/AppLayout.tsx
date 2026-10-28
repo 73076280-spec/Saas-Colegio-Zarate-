@@ -12,6 +12,7 @@ import Icon, { navigationIcon } from '../components/Icon'
 import ThemeToggle, { savedTheme } from '../components/ThemeToggle'
 import type { Theme } from '../components/ThemeToggle'
 import { canEnterVirtual } from '../virtual/access'
+import { enrollmentAccess } from '../enrollment/EnrollmentNavigation'
 export default function AppLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -28,7 +29,7 @@ export default function AppLayout() {
   const links = [['/app','Inicio',''],['/app/profile','Mi perfil','profile.view'],['/app/users','Usuarios','users.view'],['/app/institution','Institución','institutions.view'],['/app/roles','Roles y permisos','roles.view'],['/app/audit','Auditoría','audit.view']]
   if (Object.keys(catalogs).some(key => user.permissions.includes(key+'.view'))) links.push(['/app/academic','Gesti\u00f3n Acad\u00e9mica',''])
   if (['students','teachers','guardians'].some(type => user.permissions.includes(type+'.view'))) links.push(['/app/people','Personas',''])
-  if (user.permissions.includes('enrollments.view') || user.roles.some(r => ['STUDENT','GUARDIAN'].includes(r))) links.push(['/app/enrollments',user.permissions.includes('enrollments.view')?'Matrículas':'Mi matrícula',''])
+  if (enrollmentAccess(user)) links.push(['/app/enrollments','Centro de Matrículas',''])
   if (user.permissions.includes('payments.view')) links.push(['/app/payments','Tesorería','payments.view'])
   if (user.permissions.includes('teacher-assignments.view')) links.push(['/app/teacher-assignments','Asignación docente','teacher-assignments.view'])
   if (user.permissions.includes('courses.view')) links.push(['/app/courses','Cursos','courses.view'])
