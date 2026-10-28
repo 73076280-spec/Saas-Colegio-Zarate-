@@ -1,4 +1,4 @@
-import CourseLearning from '../learning/CourseLearning'
+import CourseLearning, { courseTabs } from '../learning/CourseLearning'
 import { useEffect, useState } from 'react'
 import { api, errorMessage } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
@@ -52,6 +52,6 @@ export default function TeachingPage({kind='courses',personal=false,virtualMode=
  {course&&can('close')&&detail.status!=='CLOSED'&&<button className="institutional-button" disabled={busy} onClick={()=>void action('close')}>Cerrar curso</button>}
  {!course&&can('disable')&&detail.status==='ACTIVE'&&<button className="institutional-button" disabled={busy} onClick={()=>void action('disable')}>Deshabilitar asignación</button>}
  {!course&&can('update')&&detail.status==='INACTIVE'&&<button className="institutional-button" disabled={busy} onClick={()=>void action('update',{status:'ACTIVE'})}>Reactivar asignación</button>}</div>}
- {course&&<>{user?.permissions.includes('materials.view')&&user?.permissions.includes('course-units.view')&&<CourseLearning key={detail.id} course={detail.id} closed={detail.status==='CLOSED'}/>}{(can('view')||user?.roles.includes('TEACHER'))&&<CourseRoster key={detail.id} id={detail.id}/>}</>}
+ {course&&<>{courseTabs(user).length>0&&<CourseLearning key={detail.id} course={detail.id} closed={detail.status==='CLOSED'}/>}{(can('view')||user?.roles.includes('TEACHER'))&&<CourseRoster key={detail.id} id={detail.id}/>}</>}
  </section>}</>
 }
