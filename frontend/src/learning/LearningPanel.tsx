@@ -7,7 +7,7 @@ import type { Page } from '../enrollment/shared'
 import LearningForm from './LearningForm'
 import SubmissionForm from './SubmissionForm'
 import ScoreForm from './ScoreForm'
-import { downloadSubmission, LearningStatus } from './shared'
+import { downloadSubmission, LearningStatus, submissionDeadlineBlocked, useSubmissionTiming } from './shared'
 import type { LearningKind, LearningPage, LearningRecord } from './shared'
 
 const titles: Record<LearningKind, string> = { assignments: 'Tareas', submissions: 'Entregas', assessments: 'Evaluaciones', scores: 'Notas' }
@@ -31,6 +31,8 @@ export default function LearningPanel({ kind, course, parent, gradeMode = false 
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false)
   const [form, setForm] = useState<{ mode: 'content' | 'submission' | 'review' | 'score'; record: LearningRecord | null } | null>(null)
   const [child, setChild] = useState<LearningRecord | null>(null), [history, setHistory] = useState<number | null>(null)
+  const submissionTask = kind === 'submissions' ? parent : undefined
+  const timing = useSubmissionTiming(submissionTask)
   useEffect(() => {
     let alive = true
     api<LearningPage>(endpoint + '?page=' + page).then(r => { if (alive) { setResult(r); setError('') } })
@@ -55,10 +57,14 @@ export default function LearningPanel({ kind, course, parent, gradeMode = false 
     <Message error>{error}</Message><Message>{notice}</Message>
     {error && <button className="institutional-button" onClick={reload}>Volver a intentar</button>}
     {!gradeMode && course && result?.abilities?.create && (kind === 'assignments' || kind === 'assessments') && <button className="institutional-button" onClick={() => setForm({ mode: 'content', record: null })}>{kind === 'assignments' ? 'Crear tarea' : 'Crear evaluación'}</button>}
-    {kind === 'submissions' && parent?.abilities.submit && result && (!result.data.length || result.data[0]?.status === 'RETURNED') && <button className="institutional-button" onClick={() => setForm({ mode: 'submission', record: null })}>Entregar tarea</button>}
+    {submissionTask?.due_at && <div data-testid="submission-deadline"><p>Fecha límite (hora local): {new Date(submissionTask.due_at).toLocaleString('es-PE', { timeZoneName: 'short' })}</p><p role="status">{timing.pastDue ? submissionTask.allow_late_submission ? 'Plazo vencido. Admite entregas tardías.' : 'Plazo vencido. No se permiten entregas tardías.' : 'Plazo vigente.'} {!timing.pastDue && (submissionTask.allow_late_submission ? 'Admite entregas tardías.' : 'Sin entregas tardías.')}</p><p className="text-sm text-brown-medium">El servidor confirma la disponibilidad al enviar.</p></div>}
+    {kind === 'submissions' && parent?.abilities.submit && !timing.blocked && result && (!result.data.length || result.data[0]?.status === 'RETURNED') && <button className="institutional-button" onClick={() => {
+      if (submissionDeadlineBlocked(parent)) { setError('La fecha límite venció y no se permiten entregas tardías.'); return }
+      setForm({ mode: 'submission', record: null })
+    }}>Entregar tarea</button>}
     {kind === 'scores' && result?.abilities?.create && <>{gradingOpen ? <button className="institutional-button" onClick={() => setForm({ mode: 'score', record: null })}>Registrar nota</button> : <p role="status">La evaluación o su periodo no admite cambios de notas.</p>}</>}
     {form?.mode === 'content' && course && (kind === 'assignments' || kind === 'assessments') && <LearningForm key={form.record?.id ?? 'new'} course={course} kind={kind} record={form.record} onSaved={saved} onCancel={() => setForm(null)} />}
-    {(form?.mode === 'submission' || form?.mode === 'review') && <SubmissionForm key={form.record?.id ?? 'new'} assignment={parent?.id ?? form.record?.assignment?.id ?? 0} record={form.record} review={form.mode === 'review'} onSaved={saved} onCancel={() => setForm(null)} />}
+    {(form?.mode === 'submission' || form?.mode === 'review') && <SubmissionForm key={form.record?.id ?? 'new'} assignment={parent?.id ?? form.record?.assignment?.id ?? 0} task={submissionTask} record={form.record} review={form.mode === 'review'} onSaved={saved} onCancel={() => setForm(null)} />}
     {form?.mode === 'score' && parent && <ScoreForm key={form.record?.id ?? 'new'} assessment={parent} record={form.record} onSaved={saved} onCancel={() => setForm(null)} />}
     {loading && <p role="status">Cargando registros…</p>}
     {!loading && result?.data.length === 0 && <EmptyState>No hay registros disponibles.</EmptyState>}
