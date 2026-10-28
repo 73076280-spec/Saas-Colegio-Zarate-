@@ -5,16 +5,13 @@ import LearningPanel from './LearningPanel'
 import { useAuth } from '../auth/AuthContext'
 import type { User } from '../auth/types'
 import { Message } from '../components/Form'
+import { Link } from 'react-router-dom'
+import { studentLearning, virtualSectionsFor } from '../virtual/access'
 
 export function courseTabs(user: User | null, includeAttendance = true) {
-  const tabs = [
-    ['classroom', 'Aula Virtual', 'materials.view'],
-    ['assignments', 'Tareas', 'assignments.view'],
-    ['assessments', 'Evaluaciones', 'assessments.view'],
-    ['scores', 'Calificaciones', 'scores.view'],
-  ]
-  if (includeAttendance && user?.roles.some(r => ['TEACHER','ADMINISTRATOR'].includes(r))) tabs.push(['attendance', 'Asistencia', 'attendance.view'])
-  return tabs.filter(([key, , permission]) => user?.permissions.includes(permission) && (key !== 'classroom' || user.permissions.includes('course-units.view')) && (key !== 'scores' || user.permissions.includes('assessments.view')))
+  const tabs: string[][] = virtualSectionsFor(user).map(section => [section.tab, section.tab === 'classroom' ? 'Aula Virtual' : section.label])
+  if (includeAttendance && user?.roles.some(r => ['TEACHER','ADMINISTRATOR'].includes(r)) && user.permissions.includes('attendance.view')) tabs.push(['attendance', 'Asistencia'])
+  return tabs
 }
 
 export default function CourseLearning({ course, closed, activeTab, onTabChange, includeAttendance = true }: { course: number; closed: boolean; activeTab?: string; onTabChange?: (tab: string) => void; includeAttendance?: boolean }) {
@@ -27,6 +24,6 @@ export default function CourseLearning({ course, closed, activeTab, onTabChange,
   return <section className="space-y-4"><div role="tablist" aria-label="Contenido del curso" className="flex flex-wrap gap-2">
     {tabs.map(([key, label]) => <button key={key} role="tab" aria-selected={tab === key} className={'rounded-xl border border-beige px-4 py-3 font-semibold ' + (tab === key ? 'bg-beige' : 'bg-white')} onClick={() => { setSelected(key); onTabChange?.(key) }}>{label}</button>)}
   </div><div role="tabpanel">
-    {tab === 'attendance' ? <AttendanceCourse course={course} closed={closed} /> : tab === 'classroom' ? <Classroom course={course} closed={closed} /> : <LearningPanel key={tab} course={course} kind={tab === 'assignments' ? 'assignments' : 'assessments'} gradeMode={tab === 'scores'} />}
+    {tab === 'attendance' ? <AttendanceCourse course={course} closed={closed} /> : tab === 'classroom' ? <Classroom course={course} closed={closed} /> : tab === 'scores' && studentLearning(user) && !user?.permissions.includes('assessments.view') ? <p>Consulta tus calificaciones publicadas de todos tus cursos en <Link className="underline" to="/virtual/scores">Mis notas</Link>.</p> : <LearningPanel key={tab} course={course} kind={tab === 'assignments' ? 'assignments' : 'assessments'} gradeMode={tab === 'scores'} />}
   </div></section>
 }
