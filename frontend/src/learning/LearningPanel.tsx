@@ -15,14 +15,26 @@ import AssessmentContext, { gradingGuidance } from './AssessmentContext'
 const titles: Record<LearningKind, string> = { assignments: 'Tareas', submissions: 'Entregas', assessments: 'Evaluaciones', scores: 'Notas' }
 type History = { id: number; old_score: string | null; new_score: string; reason: string | null; changed_by: number; created_at: string }
 function ScoreHistory({ id }: { id: number }) {
-  const [page, setPage] = useState(1), [result, setResult] = useState<Page<History> | null>(null), [error, setError] = useState('')
+  const [page, setPage] = useState(1), [revision, setRevision] = useState(0)
+  const requestKey = id + ':' + page + ':' + revision
+  const [response, setResponse] = useState<{ key: string; result: Page<History> | null; error: string } | null>(null)
+  const current = response?.key === requestKey ? response : null
+  const result = current?.result
   useEffect(() => {
     let alive = true
-    api<Page<History>>('/api/v1/scores/' + id + '/history?page=' + page).then(r => { if (alive) setResult(r) }).catch(e => { if (alive) setError(errorMessage(e)) })
+    api<Page<History>>('/api/v1/scores/' + id + '/history?page=' + page)
+      .then(result => { if (alive) setResponse({ key: requestKey, result, error: '' }) })
+      .catch(error => { if (alive) setResponse({ key: requestKey, result: null, error: errorMessage(error) }) })
     return () => { alive = false }
-  }, [id, page])
-  return <section className="institutional-card my-4"><h3 className="font-semibold">Historial de nota</h3><Message error>{error}</Message>{!result && !error && <p role="status">Cargando historial…</p>}
-    {result?.data.map(h => <p key={h.id} className="my-3 break-words">{h.old_score ?? 'Sin nota'} → {h.new_score} · {h.reason ?? 'Registro inicial'} · Usuario #{h.changed_by} · {new Date(h.created_at).toLocaleString('es-PE')}</p>)}<Pager page={result} onPage={setPage} /></section>
+  }, [id, page, requestKey])
+  return <section className="institutional-card my-4" aria-label="Historial de cambios de la nota">
+    <h3 className="font-semibold">Historial de cambios de la nota</h3><p>Nota #{id}</p>
+    {!current && <p role="status">Cargando historial… Página {page}.</p>}
+    {current?.error && <><Message error>No se pudo consultar el historial. {current.error}</Message><button type="button" className="institutional-button" onClick={() => setRevision(value => value + 1)}>Reintentar historial</button></>}
+    {result?.data.length === 0 && <EmptyState>No hay cambios registrados para esta nota.</EmptyState>}
+    {result?.data.map(h => <p key={h.id} className="my-3 break-words">{h.old_score ?? 'Sin nota'} → {h.new_score} · {h.reason ?? 'Registro inicial'} · Usuario #{h.changed_by} · {new Date(h.created_at).toLocaleString('es-PE')}</p>)}
+    {result && <Pager page={result} onPage={setPage} />}
+  </section>
 }
 export default function LearningPanel({ kind, course, parent, gradeMode = false }: {
   kind: LearningKind; course?: number; parent?: LearningRecord; gradeMode?: boolean
