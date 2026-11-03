@@ -21,6 +21,10 @@ function logout() {
   cy.contains('button', 'Cerrar sesión').click()
   cy.wait('@learningLogout').its('response.statusCode').should('eq', 204)
   cy.location('pathname', { timeout: 15000 }).should('eq', '/login')
+  cy.window().then(window => window.fetch('/api/v1/auth/me', {
+    credentials: 'include',
+    headers: { Accept: 'application/json' },
+  })).its('status').should('eq', 401)
 }
 function openCourse(tab: 'Tareas' | 'Evaluaciones') {
   cy.contains('nav a', 'Mis cursos').click()

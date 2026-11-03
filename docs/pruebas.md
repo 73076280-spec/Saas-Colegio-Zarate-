@@ -23,6 +23,30 @@ Las pruebas de conexión verifican MySQL real y que el usuario de testing no pue
 No basta ejecutar --exclude-group=mysql: las pruebas SaaS también requieren MySQL.
 Con PHP portátil puede usarse D:\zarate-saas\.tools\php\php.exe en lugar de php.
 
+### Docker
+
+Compose tiene un perfil `testing` con MySQL `zarate_test` en `tmpfs` y el servicio `backend-test`, que espera a que la base esté healthy, aplica migraciones y corre Pest. Preparar `backend/.env.testing` desde su ejemplo y las variables `MYSQL_TEST_ROOT_PASSWORD` y `MYSQL_TEST_PASSWORD` en `.env`; no copiar secretos a imágenes ni compartir sus valores.
+
+Desde la raíz del proyecto:
+
+```text
+docker compose --profile testing run --rm backend-test
+```
+
+Para una suite focalizada, sustituir el comando por uno que migre primero y fuerce la sesión de pruebas:
+
+```text
+docker compose --profile testing run --rm backend-test sh -c 'php artisan migrate --force && SESSION_DRIVER=array php vendor/bin/pest tests/Feature/Sprint2Test.php'
+```
+
+El contexto de build excluye el enlace local generado `backend/public/storage`; la imagen lo recrea dentro del contenedor y crea un `.env` vacío, sin incluir archivos de entorno con secretos. Al terminar y querer descartar la base temporal, quitar solo el contenedor de pruebas:
+
+```text
+docker compose --profile testing rm -sf mysql-test
+```
+
+No ejecutar pruebas con el servicio `backend` de desarrollo sin forzar explícitamente todas las variables de conexión a `mysql-test`/`zarate_test`.
+
 ## Frontend
 
 Desde frontend:
@@ -55,10 +79,33 @@ npm run typecheck
 npm test
 ```
 
+Docker también define un perfil `e2e`. El smoke de integración consulta `/api/health`; el smoke de UI simula respuestas y no escribe datos:
+
+```text
+docker compose --profile e2e run --rm e2e --spec 'cypress/e2e/integration.cy.ts,cypress/e2e/ui.cy.ts'
+```
+
+Para los flujos funcionales que escriben datos, el perfil `e2e` incluye un stack separado: `mysql-e2e` usa `zarate_e2e` en `tmpfs`, y `backend-e2e`, `nginx-e2e` y `frontend-e2e` se conectan por una red dedicada. `backend-e2e` habilita el bloqueo de sesión y usa el cache MySQL compartido para coordinarlo entre solicitudes PHP paralelas. Preparar e iniciar únicamente esos servicios:
+
+```text
+docker compose --profile e2e up -d mysql-e2e backend-e2e nginx-e2e frontend-e2e
+docker compose exec -T backend-e2e php artisan migrate --force
+docker compose exec -T backend-e2e php artisan db:seed --class=DevelopmentSeeder
+docker compose --profile e2e run --rm e2e --spec 'cypress/e2e/academic.cy.ts,cypress/e2e/enrollment.cy.ts,cypress/e2e/courses.cy.ts,cypress/e2e/learning.cy.ts,cypress/e2e/reports.cy.ts'
+```
+
+La base E2E es temporal y desaparece al quitar `mysql-e2e`; no apunta a `zarate_dev`. Para retirar solo el stack aislado, sin detener los servicios de desarrollo:
+
+```text
+docker compose --profile e2e rm -sf e2e frontend-e2e nginx-e2e backend-e2e mysql-e2e
+```
+
+El bloqueo de sesión evita que solicitudes autenticadas paralelas reescriban la sesión mientras se invalida durante logout. `learning.cy.ts` verifica que `/api/v1/auth/me` responda 401 tras cerrar sesión. Usa un cache store con locks compartidos entre procesos; el perfil E2E configura `CACHE_STORE=database`.
+
 auth.cy.ts valida login correcto/incorrecto, seis dashboards, identidad, recarga, sesión, logout, autorización, móvil y CSRF con backend real.
 integration.cy.ts consulta /api/health real.
 ui.cy.ts simula respuestas del endpoint de salud para probar éxito, fallo y reintento.
-Cypress agrega únicamente auditoría y last_login_at al usar las cuentas demo; no reinicia bases.
+Cypress puede crear o actualizar datos en los specs funcionales; el stack E2E aislado mantiene esos datos en una base temporal, separada de desarrollo.
 Login tiene rate limiting: esperar un minuto si se repite rápidamente la suite de autenticación varias veces.
 El runner elimina ELECTRON_RUN_AS_NODE y reutiliza .tools/cypress-cache si existe.
 Electron 146 pasa actualmente; Cypress anuncia su futura retirada como navegador de pruebas. Evaluar Chrome antes de actualizar Cypress.

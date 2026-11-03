@@ -7,7 +7,9 @@ WORKDIR /var/www/html
 COPY backend/composer.json backend/composer.lock ./
 RUN composer install --no-interaction --prefer-dist --no-scripts --no-autoloader
 COPY backend/ ./
-RUN composer dump-autoload --optimize \
+RUN touch .env \
+    && composer dump-autoload --optimize \
+    && php artisan storage:link \
     && chown -R www-data:www-data storage bootstrap/cache
 EXPOSE 9000
 CMD ["php-fpm"]

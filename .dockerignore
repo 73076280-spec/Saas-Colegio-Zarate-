@@ -8,6 +8,7 @@
 **/cypress/videos
 **/cypress/screenshots
 **/storage/logs/*
+backend/public/storage
 **/.env*
 !**/.env.example
 !**/.env.testing.example

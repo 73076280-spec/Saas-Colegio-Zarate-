@@ -97,6 +97,83 @@ services:
         condition: service_healthy
     command: ["sh", "-c", "php artisan migrate --force && php vendor/bin/pest"]
 
+  mysql-e2e:
+    image: mysql:8.4.11
+    profiles: ["e2e"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_TEST_ROOT_PASSWORD:?Completa .env}
+      MYSQL_DATABASE: zarate_e2e
+      MYSQL_USER: zarate_e2e
+      MYSQL_PASSWORD: ${MYSQL_TEST_PASSWORD:?Completa .env}
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql -h 127.0.0.1 -u zarate_e2e -D zarate_e2e -e 'SELECT 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - e2e
+
+  backend-e2e:
+    profiles: ["e2e"]
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    env_file: backend/.env.testing
+    environment:
+      APP_ENV: testing
+      APP_URL: http://nginx
+      DB_CONNECTION: mysql
+      DB_HOST: mysql-e2e
+      DB_PORT: 3306
+      DB_DATABASE: zarate_e2e
+      DB_USERNAME: zarate_e2e
+      DB_PASSWORD: ${MYSQL_TEST_PASSWORD:?Completa .env}
+      DB_URL: ""
+      SESSION_DRIVER: file
+      SESSION_BLOCK: "true"
+      SESSION_DOMAIN: ""
+      CACHE_STORE: database
+      SANCTUM_STATEFUL_DOMAINS: "frontend:5173,localhost:5173,127.0.0.1:5173,frontend,localhost,127.0.0.1"
+    depends_on:
+      mysql-e2e:
+        condition: service_healthy
+    networks:
+      e2e:
+        aliases:
+          - backend
+
+  nginx-e2e:
+    image: nginx:1.28-alpine
+    profiles: ["e2e"]
+    volumes:
+      - ./backend/public:/var/www/html/public:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend-e2e
+    networks:
+      e2e:
+        aliases:
+          - nginx
+
+  frontend-e2e:
+    profiles: ["e2e"]
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    environment:
+      API_PROXY_TARGET: http://nginx
+    volumes:
+      - ./frontend:/app
+      - frontend_e2e_node_modules:/app/node_modules
+    depends_on:
+      - nginx-e2e
+    networks:
+      e2e:
+        aliases:
+          - frontend
+
   e2e:
     profiles: ["e2e"]
     build:
@@ -105,9 +182,15 @@ services:
     environment:
       CYPRESS_BASE_URL: http://frontend:5173
     depends_on:
-      - frontend
+      - frontend-e2e
+    networks:
+      - e2e
 
 volumes:
   mysql_dev:
   backend_vendor:
   frontend_node_modules:
+  frontend_e2e_node_modules:
+
+networks:
+  e2e:
