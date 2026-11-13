@@ -18,6 +18,25 @@ export type LearningRecord = {
   abilities: Record<string, boolean>
 }
 export type LearningPage = Page<LearningRecord> & { abilities?: Record<string, boolean> }
+type SubmissionTiming = Pick<LearningRecord, 'due_at' | 'allow_late_submission'>
+export function submissionPastDue(task?: SubmissionTiming, now = Date.now()) {
+  const due = task?.due_at ? Date.parse(task.due_at) : NaN
+  return Number.isFinite(due) && now > due
+}
+export function submissionDeadlineBlocked(task?: SubmissionTiming) {
+  return submissionPastDue(task) && !task?.allow_late_submission
+}
+export function useSubmissionTiming(task?: SubmissionTiming) {
+  const [now, setNow] = useState(Date.now)
+  const due = task?.due_at
+  useEffect(() => {
+    if (!due || !Number.isFinite(Date.parse(due))) return
+    const timer = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(timer)
+  }, [due])
+  const pastDue = submissionPastDue(task, now)
+  return { pastDue, blocked: pastDue && !task?.allow_late_submission }
+}
 export const learningLabels: Record<string, string> = { DRAFT: 'Borrador', PUBLISHED: 'Publicado', CLOSED: 'Cerrado', SUBMITTED: 'Entregada', LATE: 'Tardía', REVIEWED: 'Revisada', RETURNED: 'Devuelta' }
 export function LearningStatus({ status }: { status: string }) { return <StatusBadge value={status}>{learningLabels[status] ?? status}</StatusBadge> }
 type Option = { id?: number; student_id?: number; name?: string; title?: string; sequence?: number; grading_open?: boolean }

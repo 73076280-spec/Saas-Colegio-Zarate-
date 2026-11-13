@@ -4,6 +4,7 @@ import { api, errorMessage } from '../api/client'
 import { Message } from '../components/Form'
 import { LearningSelect } from './shared'
 import type { LearningRecord } from './shared'
+import AssessmentContext, { gradingGuidance } from './AssessmentContext'
 
 export default function ScoreForm({ assessment, record, onSaved, onCancel }: {
   assessment: LearningRecord; record: LearningRecord | null; onSaved: () => void; onCancel: () => void
@@ -22,6 +23,8 @@ export default function ScoreForm({ assessment, record, onSaved, onCancel }: {
   }
   return <form className="institutional-card my-4 space-y-4" data-testid="score-form" onSubmit={e => void save(e)}>
     <h3 className="text-lg font-semibold">{record ? 'Modificar nota' : 'Registrar nota'} · {assessment.title}</h3>
+    <AssessmentContext assessment={assessment} />
+    <p className="text-sm text-brown-medium">{gradingGuidance(assessment)}</p>
     {record ? <p>{record.student?.name}</p> : <LearningSelect label="Estudiante matriculado" name="student_id" endpoint={'/api/v1/courses/' + assessment.course.id + '/students'} value={student} onChange={setStudent} />}
     <label className="block space-y-2">Nota<input className="institutional-field w-full" type="number" name="score" required min={0} max={Number(assessment.max_score ?? 20)} step="0.01" value={score} onChange={e => setScore(e.target.value)} /></label>
     <label className="block space-y-2">Observación<textarea className="institutional-field w-full" name="observations" maxLength={5000} value={observations} onChange={e => setObservations(e.target.value)} /></label>

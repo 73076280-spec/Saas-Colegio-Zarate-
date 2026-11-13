@@ -8,6 +8,9 @@ import JustificationsPage from './attendance/JustificationsPage'
 import LearningPanel from './learning/LearningPanel'
 import TeachingPage from './courses/TeachingPage'
 import EnrollmentsPage from './enrollment/EnrollmentsPage'
+import EnrollmentLayout from './enrollment/EnrollmentLayout'
+import EnrollmentDashboard from './enrollment/EnrollmentDashboard'
+import EnrollmentCapacity from './enrollment/EnrollmentCapacity'
 import PaymentsPage from './enrollment/PaymentsPage'
 import PeopleHome from './people/PeopleHome'
 import PeoplePage from './people/PeoplePage'
@@ -27,6 +30,9 @@ import InstitutionPage from './pages/InstitutionPage'
 import RolesPage from './pages/RolesPage'
 import AuditPage from './pages/AuditPage'
 import { Message } from './components/Form'
+import VirtualLayout from './layouts/VirtualLayout'
+import VirtualDashboard from './virtual/VirtualDashboard'
+import { VirtualAccess, VirtualCourse, VirtualSection } from './virtual/VirtualPages'
 function Protected({ children, password = false, permission }: { children: ReactNode; password?: boolean; permission?: string }) {
   const { user, loading, error, refresh } = useAuth()
   if (loading) return <p role="status" className="p-8">Consultando sesión…</p>
@@ -41,6 +47,16 @@ export default function App() {
     <Route path="/" element={<TechnicalPage />} />
     <Route path="*" element={<AuthProvider><Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/virtual" element={<Protected><VirtualAccess><VirtualLayout /></VirtualAccess></Protected>}>
+        <Route index element={<VirtualDashboard />} />
+        <Route path="courses" element={<VirtualSection />} />
+        <Route path="courses/:courseId/:section?" element={<VirtualCourse />} />
+        <Route path="materials" element={<VirtualSection section="materials" />} />
+        <Route path="assignments" element={<VirtualSection section="assignments" />} />
+        <Route path="assessments" element={<VirtualSection section="assessments" />} />
+        <Route path="scores" element={<VirtualSection section="scores" />} />
+        <Route path="*" element={<Navigate to="/virtual" replace />} />
+      </Route>
       <Route path="/app" element={<Protected password><AppLayout /></Protected>}>
         <Route path="reports" element={<Protected><ReportsPage /></Protected>} />
         <Route path="requests" element={<Protected permission="requests.view"><RequestsPage /></Protected>} />
@@ -59,7 +75,13 @@ export default function App() {
         <Route path="teacher-assignments" element={<Protected permission="teacher-assignments.view"><TeachingPage kind="teacher-assignments" /></Protected>} />
         <Route path="my-courses" element={<Protected><TeachingPage personal /></Protected>} />
         <Route path="my-courses/:id" element={<Protected><TeachingPage personal /></Protected>} />
-        <Route path="enrollments" element={<Protected><EnrollmentsPage /></Protected>} />
+        <Route path="enrollments" element={<Protected><EnrollmentLayout /></Protected>}>
+          <Route index element={<EnrollmentDashboard />} />
+          <Route path="list" element={<EnrollmentsPage key="list" />} />
+          <Route path="new" element={<Protected permission="enrollments.create"><EnrollmentsPage key="new" initialCreate /></Protected>} />
+          <Route path="capacity" element={<EnrollmentCapacity />} />
+          <Route path="history" element={<EnrollmentsPage key="history" historyOnly />} />
+        </Route>
         <Route path="payments" element={<Protected permission="payments.view"><PaymentsPage /></Protected>} />
         <Route path="academic" element={<Protected><AcademicHome /></Protected>} />
         <Route path="academic/:catalog" element={<Protected><AcademicPage /></Protected>} />
