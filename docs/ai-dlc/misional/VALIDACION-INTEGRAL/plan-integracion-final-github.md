@@ -373,3 +373,13 @@ Se acreditaron otra vez los 603 sellos de fuentes, cuatro sellos de documentos h
 Orden autorizado para esta intervención: registrar las 54 rutas públicas en test/integracion-misional; crear integration/eco-aula-entrega-final en un worktree nuevo basado en origin/main; fusionar test/integracion-misional, que ya contiene feature/macro-misional como ancestro. No se avanza la rama macro ni se fusionan de nuevo sus ramas hijas. Esto sustituye, para Prompt 49, las fases anteriores que proponían stash y avance de macro o promoción de main.
 
 El ensayo se realizará con --no-ff --no-commit. Si aparecen conflictos funcionales, se conservará su estado y se documentarán ambos lados y una propuesta antes de aplicar cualquier resolución que cambie comportamiento. El informe de ejecución será resultado-integracion-local.md. Ningún candidato nuevo hereda automáticamente las regresiones históricas 314/314 y 46/46 del contenido sellado de 1a04303.
+
+### Resultado efectivo del ensayo — Prompt 49
+
+Se creó el commit local `01b4c963f3aa8183d32aea7c7c8e4f5ff118475c` con las 54 rutas verificadas y el candidato `integration/eco-aula-entrega-final` en `D:/zarate-saas-entrega-final`, desde `origin/main` 0d98612. La fusión conserva MERGE_HEAD 01b4c96 y HEAD 0d98612: **no existe todavía commit de integración**.
+
+Estado **C. INTEGRACIÓN PARCIAL CON CONFLICTOS**: App.tsx tiene un bloque y TeachingPage.tsx tres bloques sin resolver. README se fusionó automáticamente, sin resolución manual. Se preservan 196 rutas sin conflicto en el índice y dos entradas unmerged. Los siete pendientes permanecen intactos y excluidos, sin mover la rama macro ni usar stash.
+
+La propuesta de composición de rutas, props, navegación y permisos está en [resultado-integracion-local.md](resultado-integracion-local.md). No se aplicó porque modifica comportamiento y requiere revisión previa según Prompt 49. Build, ESLint, TypeScript E2E y pruebas focalizadas del candidato quedan NO EJECUTADOS. El diff --check del origen y del contenido preparado sin conflicto aprueba; el árbol candidato devuelve 2 por los 12 marcadores de conflicto, que se conservan como evidencia.
+
+Este informe complementario y el anexo del plan constituyen documentación adicional expresamente autorizada, separada de las 54 rutas del commit inicial. No reiniciar el merge ni promover main; revisar primero la resolución propuesta y luego recuperar cualquier commit documental posterior de test. No hubo push, cambio de main, modificación de bases ni reejecución de QA.
