@@ -143,3 +143,34 @@ git -C D:\zarate-saas push origin integration/eco-aula-entrega-final
 ```
 
 No se ejecutó ninguno de esos push ni se creó PR. La preparación se detuvo en la revisión funcional exigida por Prompt 49, conservando el commit público, ambos historiales y el estado exacto del ensayo para continuar.
+
+---
+
+## Prompt 50 - Estado vigente de integracion local
+
+Fecha: 12/11/2026.
+
+Estado: B - Integracion local completada con validaciones pendientes.
+
+Se resolvieron los conflictos funcionales de App.tsx y TeachingPage.tsx, conservando las rutas de cursos, matriculas y Aula Virtual.
+
+Commits de integracion:
+- f5becce: integracion funcional.
+- e4e6c58: incorporacion documental.
+
+Comprobaciones del candidato:
+- Compilacion frontend: aprobada.
+- ESLint focalizado: aprobado.
+- TypeScript: aprobado.
+- Cypress con API simulada: 17/17 aprobados.
+- Conflictos Git pendientes: ninguno.
+
+La QA historica acredita 314/314 Pest y 46/46 E2E reales para la revision 1a04303 junto con sus archivos sellados.
+
+Estas regresiones no se atribuyen automaticamente al candidato fusionado. Quedan pendientes las comprobaciones reales focalizadas de los cambios incorporados.
+
+Los siete archivos funcionales aplazados no se incorporaron.
+
+No se realizo push ni se modifico main.
+
+La publicacion debe efectuarse primero mediante una rama candidata y posterior revision de Pull Request.
