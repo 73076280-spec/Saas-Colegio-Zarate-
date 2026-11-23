@@ -1,0 +1,70 @@
+[
+  {
+    "method": "Cypress.press",
+    "events": [
+      {
+        "type": "keydown",
+        "key": "Enter",
+        "trusted": true,
+        "prevented": false,
+        "target": "Reintentar historial",
+        "focused": true
+      },
+      {
+        "type": "keyup",
+        "key": "Enter",
+        "trusted": true,
+        "prevented": false,
+        "target": "Reintentar historial",
+        "focused": true
+      }
+    ],
+    "requests": [
+      "GET /api/v1/auth/me",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/my/scores?page=1",
+      "GET /api/v1/my/scores?page=1",
+      "GET /api/v1/scores/12/history?page=1",
+      "GET /api/v1/scores/12/history?page=1",
+      "GET /api/v1/scores/12/history?page=2"
+    ],
+    "focusBeforeKey": {
+      "document": true,
+      "target": "Reintentar historial"
+    }
+  },
+  {
+    "method": "CDP",
+    "events": [
+      {
+        "type": "keydown",
+        "key": "Enter",
+        "trusted": true,
+        "prevented": false,
+        "target": "Reintentar historial",
+        "focused": true
+      },
+      {
+        "type": "keyup",
+        "key": "Enter",
+        "trusted": true,
+        "prevented": false,
+        "target": "Reintentar historial",
+        "focused": true
+      }
+    ],
+    "requests": [
+      "GET /api/v1/auth/me",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/my/scores?page=1",
+      "GET /api/v1/my/scores?page=1",
+      "GET /api/v1/scores/12/history?page=1",
+      "GET /api/v1/scores/12/history?page=1",
+      "GET /api/v1/scores/12/history?page=2"
+    ],
+    "focusBeforeKey": {
+      "document": true,
+      "target": "Reintentar historial"
+    }
+  }
+]

@@ -22,7 +22,7 @@ export function navigationIcon(path: string) {
   if (path === '/app') return 'home'
   if (/profile|people|users|teacher-assignments/.test(path)) return 'user'
   if (/report|scores/.test(path)) return 'chart'
-  if (/payment/.test(path)) return 'wallet'
+  if (/payment|treasury/.test(path)) return 'wallet'
   if (/attendance|academic|enrollment/.test(path)) return 'calendar'
   if (/roles|audit|password/.test(path)) return 'shield'
   if (/notifications|communications/.test(path)) return 'bell'

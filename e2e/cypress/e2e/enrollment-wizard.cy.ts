@@ -1,0 +1,118 @@
+export {}
+const permissions=['enrollments.view','enrollments.create','enrollments.update','profile.view','student-guardians.view']
+function setup(perms=permissions){
+ cy.intercept('GET','/api/v1/auth/me',{data:{id:1,name:'Secretaría',institution_id:1,institution:{id:1,name:'Colegio Zárate',code:'Z'},roles:['SECRETARY'],permissions:perms}})
+ cy.intercept('GET','/api/v1/enrollments?*',{data:[],meta:{current_page:1,last_page:1,total:0}})
+ cy.intercept('GET','/api/v1/enrollment-options?*',req=>{
+  const kind=String(req.query.kind)
+  const names:Record<string,string>={students:'Ana — EST-001',years:'2026',grades:'Primaria — Primero',sections:'A'}
+  req.reply({data:[{id:1,name:names[kind],...(kind==='sections'?{capacity:20,occupied:5}:{})}],current_page:1,last_page:1})
+ })
+ cy.intercept('GET','/api/v1/students/1/guardians?*',{data:[{id:1,guardian:{name:'Apoderado autorizado'},relationship:'MOTHER',is_primary:true}],meta:{current_page:1,last_page:1}}).as('family')
+ cy.visit('/app/enrollments/new')
+}
+function next(){cy.get('[data-testid="enrollment-wizard"]').contains('button[type="submit"]','Siguiente').click()}
+function academics(){
+ cy.get('select[name="academic_year_id"] option').should('have.length',2)
+ cy.get('select[name="academic_year_id"]').select('1')
+ cy.get('select[name="grade_level_id"] option').should('have.length',2)
+ cy.get('select[name="grade_level_id"]').select('1')
+ cy.get('select[name="section_id"] option').should('have.length',2)
+ cy.get('select[name="section_id"]').select('1')
+}
+function review(){
+ cy.get('select[name="student_id"] option').should('have.length',2)
+ cy.get('select[name="student_id"]').select('1');next();next();academics()
+ cy.get('textarea[name="observations"]').type('Conservar observaciones');next()
+}
+beforeEach(function(){return cy.env(['wizardCase'],{log:false}).then(({wizardCase})=>{if(wizardCase&&!this.currentTest?.title.startsWith(String(wizardCase)))this.skip()})})
+describe('Fase 2.2: asistente con contratos API simulados, sin escrituras reales',()=>{
+ it('valida, conserva valores, muestra cupos y confirma una sola petición exitosa',()=>{
+  setup();cy.get('#student_id').should('not.be.disabled');next();cy.get('#student_id-error').should('be.visible');cy.get('#student_id').should('have.focus')
+  cy.get('select[name="student_id"]').select('1');next();cy.wait('@family');cy.contains('Apoderado autorizado').should('be.visible');next()
+  next();cy.get('#academic_year_id-error').should('be.visible');academics()
+  cy.contains('Disponibles: 15').should('be.visible')
+  cy.get('textarea[name="observations"]').type('Conservar observaciones');next()
+  cy.get('[data-testid="enrollment-wizard"]').contains('button.min-h-11','Anterior').click()
+  cy.get('textarea[name="observations"]').should('have.value','Conservar observaciones')
+  cy.get('select[name="section_id"]').should('have.value','1');next()
+  cy.viewport(390,844)
+  cy.document().then(d=>expect(d.documentElement.scrollWidth).to.be.at.most(d.documentElement.clientWidth))
+  cy.intercept('POST','/api/v1/enrollments',{statusCode:201,delay:500,body:{data:{id:9,enrollment_code:'MAT-2026-TEST',status:'DRAFT'}}}).as('save')
+  cy.contains('button','Confirmar y guardar matrícula').click()
+  cy.contains('button','Guardando matrícula').should('be.disabled')
+  cy.contains('Matrícula guardada correctamente').should('not.exist')
+  cy.wait('@save').its('request.body').should('deep.equal',{student_id:1,academic_year_id:1,grade_level_id:1,section_id:1,observations:'Conservar observaciones'})
+  cy.contains('Matrícula guardada correctamente').should('be.visible')
+  cy.get('[data-testid="enrollment-wizard"]').should('contain','Borrador')
+  cy.get('@save.all').should('have.length',1)
+ })
+ it('muestra errores del servidor junto al campo y permite corregir sin confirmar',()=>{
+  setup();review()
+  cy.intercept('POST','/api/v1/enrollments',{statusCode:422,body:{message:'Error',errors:{section_id:['La sección ya no está activa.']}}}).as('invalid')
+  cy.contains('button','Confirmar y guardar matrícula').click();cy.wait('@invalid')
+  cy.get('#section_id-error').should('contain','La sección ya no está activa.')
+  cy.get('textarea[name="observations"]').should('have.value','Conservar observaciones')
+  cy.contains('Matrícula guardada correctamente').should('not.exist')
+ })
+ it('omite consultas familiares sin permiso y conserva permisos de creación',()=>{
+  let familyRequests=0
+  setup(permissions.filter(p=>p!=='student-guardians.view'))
+  cy.intercept('GET','/api/v1/students/*/guardians?*',()=>{familyRequests++})
+  cy.get('select[name="student_id"] option').should('have.length',2)
+  cy.get('select[name="student_id"]').select('1');next()
+  cy.contains('La consulta de apoderados requiere un permiso adicional').should('be.visible').then(()=>expect(familyRequests).to.eq(0));next()
+  cy.get('select[name="academic_year_id"]').should('exist')
+  cy.intercept('GET','/api/v1/auth/me',{data:{id:2,name:'Estudiante',institution_id:1,institution:{id:1,name:'Colegio Zárate',code:'Z'},roles:['STUDENT'],permissions:['profile.view']}})
+  cy.visit('/app/enrollments/new');cy.contains('No tienes permiso para acceder').should('be.visible')
+  cy.get('[data-testid="enrollment-wizard"]').should('not.exist')
+ })
+})
+describe('Fase 2.2: comprobaciones adicionales de compatibilidad',()=>{
+ it('adicional: cambia dependencias y muestra secciones vacías sin perder observaciones',()=>{
+  setup();review()
+  cy.get('[data-testid="enrollment-wizard"]').contains('button.min-h-11','Anterior').click()
+  cy.intercept('GET','/api/v1/enrollment-options?kind=sections*',{data:[],current_page:1,last_page:1})
+  cy.get('select[name="academic_year_id"]').select('')
+  cy.get('select[name="grade_level_id"]').should('not.exist')
+  cy.get('select[name="section_id"]').should('not.exist')
+  cy.get('select[name="academic_year_id"]').select('1')
+  cy.get('select[name="grade_level_id"]').should('have.value','')
+  cy.get('select[name="grade_level_id"] option').should('have.length',2)
+  cy.get('select[name="grade_level_id"]').select('1')
+  cy.contains('No hay secciones disponibles para esta consulta.').should('be.visible')
+  cy.get('select[name="section_id"]').should('have.value','')
+  cy.get('textarea[name="observations"]').should('have.value','Conservar observaciones')
+  next();cy.get('#section_id-error').should('be.visible')
+ })
+ it('adicional: edita con PATCH y conserva estado observado y acceso al detalle editable',()=>{
+  setup()
+  const record={id:8,enrollment_code:'MAT-EDIT',student_id:1,academic_year_id:1,grade_level_id:1,section_id:1,status:'OBSERVED',observations:'Corregir',enrolled_at:null,student:{name:'Ana'},academic_year:{name:'2026'},grade_level:{name:'Primero',level:'Primaria'},section:{name:'A',capacity:20},history:[]}
+  cy.intercept('GET','/api/v1/enrollments?*',{data:[record],meta:{current_page:1,last_page:1,total:1}})
+  cy.intercept('GET','/api/v1/enrollments/8',{data:record})
+  cy.intercept('PATCH','/api/v1/enrollments/8',{data:{...record,observations:'Corregido'}}).as('patch')
+  cy.visit('/app/enrollments/list');cy.contains('button','Detalle').click()
+  cy.contains('button','Editar matrícula').click();next();next()
+  cy.get('textarea[name="observations"]').clear().type('Corregido');next()
+  cy.contains('button','Confirmar y guardar matrícula').click()
+  cy.wait('@patch').its('request.body.observations').should('eq','Corregido')
+  cy.get('[data-testid="enrollment-wizard"]').should('contain','Observada')
+  cy.contains('button','Ver detalle').click()
+  cy.get('[data-testid="enrollment-detail"]').should('contain','Observada')
+  // La edición conserva el permiso y estado existentes.
+  cy.get('[data-testid="enrollment-detail"]').contains('button','Editar matrícula').should('exist')
+ })
+ it('adicional: mantiene navegación del centro y entrada al Aula Virtual',()=>{
+  setup()
+  cy.intercept('GET','/api/v1/dashboard',{years:[{id:1,name:'2026'}]})
+  cy.get('nav[aria-label="Navegación de Matrículas"] a[href="/app/enrollments"]').click()
+  cy.get('[data-testid="enrollment-count-0"]').should('have.text','0')
+  cy.get('nav[aria-label="Navegación de Matrículas"] a[href$="/list"]').click()
+  cy.contains('h1','Matrículas').should('be.visible')
+  cy.intercept('GET','/api/v1/auth/me',{data:{id:3,name:'Docente',first_name:'Docente',institution_id:1,institution:{id:1,name:'Colegio Zárate',code:'Z'},roles:['TEACHER'],permissions:['profile.view','assignments.view']}})
+  cy.intercept('GET','/api/v1/my/courses?*',{data:[],meta:{total:0}})
+  cy.visit('/virtual')
+  cy.get('nav[aria-label="Navegación del Aula Virtual"]').should('be.visible')
+  cy.contains('h1','Tu aula, más cerca.').should('be.visible')
+ })
+})

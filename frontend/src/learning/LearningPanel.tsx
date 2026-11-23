@@ -7,36 +7,62 @@ import type { Page } from '../enrollment/shared'
 import LearningForm from './LearningForm'
 import SubmissionForm from './SubmissionForm'
 import ScoreForm from './ScoreForm'
-import { downloadSubmission, LearningStatus } from './shared'
+import { downloadSubmission, learningLabels, LearningStatus, submissionDeadlineBlocked, useSubmissionTiming } from './shared'
+import { useAuth } from '../auth/AuthContext'
 import type { LearningKind, LearningPage, LearningRecord } from './shared'
+import AssessmentContext, { gradingGuidance } from './AssessmentContext'
 
 const titles: Record<LearningKind, string> = { assignments: 'Tareas', submissions: 'Entregas', assessments: 'Evaluaciones', scores: 'Notas' }
 type History = { id: number; old_score: string | null; new_score: string; reason: string | null; changed_by: number; created_at: string }
 function ScoreHistory({ id }: { id: number }) {
-  const [page, setPage] = useState(1), [result, setResult] = useState<Page<History> | null>(null), [error, setError] = useState('')
+  const [page, setPage] = useState(1), [revision, setRevision] = useState(0)
+  const requestKey = id + ':' + page + ':' + revision
+  const [response, setResponse] = useState<{ key: string; result: Page<History> | null; error: string } | null>(null)
+  const current = response?.key === requestKey ? response : null
+  const result = current?.result
   useEffect(() => {
     let alive = true
-    api<Page<History>>('/api/v1/scores/' + id + '/history?page=' + page).then(r => { if (alive) setResult(r) }).catch(e => { if (alive) setError(errorMessage(e)) })
+    api<Page<History>>('/api/v1/scores/' + id + '/history?page=' + page)
+      .then(result => { if (alive) setResponse({ key: requestKey, result, error: '' }) })
+      .catch(error => { if (alive) setResponse({ key: requestKey, result: null, error: errorMessage(error) }) })
     return () => { alive = false }
-  }, [id, page])
-  return <section className="institutional-card my-4"><h3 className="font-semibold">Historial de nota</h3><Message error>{error}</Message>{!result && !error && <p role="status">Cargando historial…</p>}
-    {result?.data.map(h => <p key={h.id} className="my-3 break-words">{h.old_score ?? 'Sin nota'} → {h.new_score} · {h.reason ?? 'Registro inicial'} · Usuario #{h.changed_by} · {new Date(h.created_at).toLocaleString('es-PE')}</p>)}<Pager page={result} onPage={setPage} /></section>
+  }, [id, page, requestKey])
+  return <section className="institutional-card my-4" aria-label="Historial de cambios de la nota">
+    <h3 className="font-semibold">Historial de cambios de la nota</h3><p>Nota #{id}</p>
+    {!current && <p role="status">Cargando historial… Página {page}.</p>}
+    {current?.error && <><Message error>No se pudo consultar el historial. {current.error}</Message><button type="button" className="institutional-button" onClick={() => setRevision(value => value + 1)}>Reintentar historial</button></>}
+    {result?.data.length === 0 && <EmptyState>No hay cambios registrados para esta nota.</EmptyState>}
+    {result?.data.map(h => <p key={h.id} className="my-3 break-words">{h.old_score ?? 'Sin nota'} → {h.new_score} · {h.reason ?? 'Registro inicial'} · Usuario #{h.changed_by} · {new Date(h.created_at).toLocaleString('es-PE')}</p>)}
+    {result && <Pager page={result} onPage={setPage} />}
+  </section>
 }
 export default function LearningPanel({ kind, course, parent, gradeMode = false }: {
   kind: LearningKind; course?: number; parent?: LearningRecord; gradeMode?: boolean
 }) {
   const personal = !course && !parent
+  const { user } = useAuth()
+  const filterStates = kind === 'submissions' ? ['SUBMITTED', 'LATE', 'REVIEWED', 'RETURNED'] : ['DRAFT', 'PUBLISHED', 'CLOSED']
+  const canFilter = !gradeMode && !!user?.roles.some(role => ['TEACHER', 'ADMINISTRATOR'].includes(role)) && user.permissions.includes(kind + '.view') &&
+    ((!!course && (kind === 'assignments' || kind === 'assessments')) || (!!parent && kind === 'submissions' && !parent.abilities.submit))
+  const [status, setStatus] = useState('')
+  const activeStatus = canFilter ? status : ''
   const endpoint = parent ? '/api/v1/' + (kind === 'submissions' ? 'assignments' : 'assessments') + '/' + parent.id + '/' + kind : course ? '/api/v1/courses/' + course + '/' + kind : '/api/v1/my/' + kind
   const [result, setResult] = useState<LearningPage | null>(null), [page, setPage] = useState(1), [revision, setRevision] = useState(0)
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false)
   const [form, setForm] = useState<{ mode: 'content' | 'submission' | 'review' | 'score'; record: LearningRecord | null } | null>(null)
   const [child, setChild] = useState<LearningRecord | null>(null), [history, setHistory] = useState<number | null>(null)
+  const submissionTask = kind === 'submissions' ? parent : undefined
+  const timing = useSubmissionTiming(submissionTask)
   useEffect(() => {
     let alive = true
-    api<LearningPage>(endpoint + '?page=' + page).then(r => { if (alive) { setResult(r); setError('') } })
+    api<LearningPage>(endpoint + '?' + new URLSearchParams({ page: String(page), ...(activeStatus ? { status: activeStatus } : {}) })).then(r => { if (alive) { setResult(r); setError('') } })
       .catch(e => { if (alive) { setError(errorMessage(e)); setResult(null) } }).finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [endpoint, page, revision])
+  }, [endpoint, page, revision, activeStatus])
+  function changeStatus(value: string) {
+    setStatus(value); setPage(1); setResult(null); setLoading(true); setError(''); setNotice('')
+    setChild(null); setForm(null); setHistory(null)
+  }
   function reload() { setLoading(true); setRevision(v => v + 1) }
   function saved() { setForm(null); setNotice('Registro guardado.'); reload() }
   async function transition(record: LearningRecord, operation: 'publish' | 'close') {
@@ -52,19 +78,30 @@ export default function LearningPanel({ kind, course, parent, gradeMode = false 
   const gradingOpen = parent?.status === 'PUBLISHED' && parent?.period?.grading_open
   return <section className="my-4 space-y-4" data-testid={'learning-' + kind}>
     <PageHeading title={personal ? 'Mis ' + titles[kind].toLowerCase() : gradeMode ? 'Calificaciones' : titles[kind]} description={parent?.title ?? 'Seguimiento académico del curso.'} />
+    {kind === 'scores' && parent && <><AssessmentContext assessment={parent} />{(result?.abilities?.create || result?.data.some(record => record.abilities.update)) && <p role="status">{gradingGuidance(parent)}</p>}</>}
     <Message error>{error}</Message><Message>{notice}</Message>
+    {canFilter && <label className="block space-y-2 font-semibold">{kind === 'submissions' ? 'Estado de entregas' : kind === 'assignments' ? 'Estado de tareas' : 'Estado de evaluaciones'}
+      <select className="institutional-field w-full sm:w-auto" value={status} onChange={event => changeStatus(event.target.value)}>
+        <option value="">Todos</option>{filterStates.map(value => <option key={value} value={value}>{learningLabels[value]}</option>)}
+      </select>
+    </label>}
     {error && <button className="institutional-button" onClick={reload}>Volver a intentar</button>}
     {!gradeMode && course && result?.abilities?.create && (kind === 'assignments' || kind === 'assessments') && <button className="institutional-button" onClick={() => setForm({ mode: 'content', record: null })}>{kind === 'assignments' ? 'Crear tarea' : 'Crear evaluación'}</button>}
-    {kind === 'submissions' && parent?.abilities.submit && result && (!result.data.length || result.data[0]?.status === 'RETURNED') && <button className="institutional-button" onClick={() => setForm({ mode: 'submission', record: null })}>Entregar tarea</button>}
-    {kind === 'scores' && result?.abilities?.create && <>{gradingOpen ? <button className="institutional-button" onClick={() => setForm({ mode: 'score', record: null })}>Registrar nota</button> : <p role="status">La evaluación o su periodo no admite cambios de notas.</p>}</>}
+    {submissionTask?.due_at && <div data-testid="submission-deadline"><p>Fecha límite (hora local): {new Date(submissionTask.due_at).toLocaleString('es-PE', { timeZoneName: 'short' })}</p><p role="status">{timing.pastDue ? submissionTask.allow_late_submission ? 'Plazo vencido. Admite entregas tardías.' : 'Plazo vencido. No se permiten entregas tardías.' : 'Plazo vigente.'} {!timing.pastDue && (submissionTask.allow_late_submission ? 'Admite entregas tardías.' : 'Sin entregas tardías.')}</p><p className="text-sm text-brown-medium">El servidor confirma la disponibilidad al enviar.</p></div>}
+    {kind === 'submissions' && parent?.abilities.submit && !timing.blocked && result && (!result.data.length || result.data[0]?.status === 'RETURNED') && <button className="institutional-button" onClick={() => {
+      if (submissionDeadlineBlocked(parent)) { setError('La fecha límite venció y no se permiten entregas tardías.'); return }
+      setForm({ mode: 'submission', record: null })
+    }}>Entregar tarea</button>}
+    {kind === 'scores' && result?.abilities?.create && gradingOpen && <button className="institutional-button" onClick={() => setForm({ mode: 'score', record: null })}>Registrar nota</button>}
     {form?.mode === 'content' && course && (kind === 'assignments' || kind === 'assessments') && <LearningForm key={form.record?.id ?? 'new'} course={course} kind={kind} record={form.record} onSaved={saved} onCancel={() => setForm(null)} />}
-    {(form?.mode === 'submission' || form?.mode === 'review') && <SubmissionForm key={form.record?.id ?? 'new'} assignment={parent?.id ?? form.record?.assignment?.id ?? 0} record={form.record} review={form.mode === 'review'} onSaved={saved} onCancel={() => setForm(null)} />}
+    {(form?.mode === 'submission' || form?.mode === 'review') && <SubmissionForm key={form.record?.id ?? 'new'} assignment={parent?.id ?? form.record?.assignment?.id ?? 0} task={submissionTask} record={form.record} review={form.mode === 'review'} onSaved={saved} onCancel={() => setForm(null)} />}
     {form?.mode === 'score' && parent && <ScoreForm key={form.record?.id ?? 'new'} assessment={parent} record={form.record} onSaved={saved} onCancel={() => setForm(null)} />}
     {loading && <p role="status">Cargando registros…</p>}
-    {!loading && result?.data.length === 0 && <EmptyState>No hay registros disponibles.</EmptyState>}
+    {!loading && result?.data.length === 0 && <EmptyState>{activeStatus ? 'No hay registros con el estado seleccionado. Selecciona Todos para ampliar la consulta.' : 'No hay registros disponibles.'}</EmptyState>}
     {kind === 'scores' ? <div className="institutional-card overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr>{['Estudiante', 'Curso / Periodo', 'Evaluación', 'Nota', 'Observación', 'Acción'].map(t => <th key={t} className="p-3">{t}</th>)}</tr></thead><tbody>{result?.data.map(r => <tr key={r.id} className="border-t border-beige" data-testid="score-row"><td className="p-3">{r.student?.name}</td><td className="p-3">{r.course.name} / {r.period?.name}</td><td className="p-3">{r.assessment?.title}</td><td className="p-3 font-semibold">{r.score}</td><td className="p-3 whitespace-pre-wrap">{r.observations}</td><td className="space-y-2 p-3">{r.abilities.update && gradingOpen && <button className="institutional-button" onClick={() => setForm({ mode: 'score', record: r })}>Modificar nota</button>}<button className="institutional-button" onClick={() => setHistory(r.id)}>Historial</button></td></tr>)}</tbody></table></div> :
       <div className="grid gap-4">{result?.data.map(r => <article key={r.id} className="institutional-card min-w-0 space-y-3" data-testid="learning-card">
         <h3 className="break-words text-lg font-semibold">{r.title ?? r.assignment?.title}</h3><LearningStatus status={r.status} /><p className="text-sm text-brown-medium">{r.course.name}{r.period ? ' · ' + r.period.name : ''}</p>
+        {kind === 'assessments' && <AssessmentContext assessment={r} />}
         {r.due_at && <p>Fecha límite: {new Date(r.due_at).toLocaleString('es-PE')} · {r.allow_late_submission ? 'Admite entregas tardías' : 'Sin entregas tardías'}</p>}
         {r.description && <p className="whitespace-pre-wrap break-words">{r.description}</p>}
         {r.instructions && <p className="whitespace-pre-wrap break-words">Instrucciones: {r.instructions}</p>}

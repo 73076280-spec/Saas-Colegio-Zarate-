@@ -65,7 +65,9 @@ describe('Sprint 1: autenticación real y núcleo SaaS', () => {
         cy.wait('@auditPage').its('response.statusCode').should('eq', 200)
         cy.contains('td', 'LOGIN', { timeout: 15000 }).should('exist')
       } else {
+        cy.intercept('GET', '/api/v1/auth/me').as('restrictedPageSession')
         cy.visit('/app/users')
+        cy.wait('@restrictedPageSession').its('response.statusCode').should('eq', 200)
         cy.get('[role="alert"]').should('contain', 'No tienes permiso')
         cy.request({ url: '/api/v1/users', failOnStatusCode: false, headers: { Origin: 'http://localhost:5173', Accept: 'application/json' } }).its('status').should('eq', 403)
       }

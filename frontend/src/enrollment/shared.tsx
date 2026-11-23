@@ -11,16 +11,18 @@ export function Pager({page,onPage}:{page:Page<unknown>|null;onPage:(n:number)=>
  const current=page?.meta?.current_page??page?.current_page??1,last=page?.meta?.last_page??page?.last_page??1
  return <div className="my-4 flex flex-wrap items-center gap-4"><button type="button" className="institutional-button" disabled={current<=1} onClick={()=>onPage(current-1)}>Anterior</button><span>Página {current} de {last}</span><button type="button" className="institutional-button" disabled={current>=last} onClick={()=>onPage(current+1)}>Siguiente</button></div>
 }
-export function Lookup({label,name,kind,value,onChange,year='',grade='',revision=0,endpoint='/api/v1/enrollment-options'}:{label:string;name:string;kind:string;value:string;onChange:(v:string)=>void;year?:string;grade?:string;revision?:number;endpoint?:string}) {
- const [search,setSearch]=useState(''),[page,setPage]=useState(1),[result,setResult]=useState<Page<Option>|null>(null),[error,setError]=useState('')
+export function Lookup({label,name,kind,value,onChange,year='',grade='',revision=0,endpoint='/api/v1/enrollment-options',onSelect,invalid=false,errorId}:{label:string;name:string;kind:string;value:string;onChange:(v:string)=>void;year?:string;grade?:string;revision?:number;endpoint?:string;onSelect?:(option:Option|undefined)=>void;invalid?:boolean;errorId?:string}) {
+ const [search,setSearch]=useState(''),[page,setPage]=useState(1),[result,setResult]=useState<Page<Option>|null>(null),[error,setError]=useState(''),[settled,setSettled]=useState('')
+ const requestKey=JSON.stringify([kind,search,page,year,grade,revision,endpoint])
+ const loading=settled!==requestKey
  useEffect(()=>{ let alive=true
  const timer=setTimeout(()=>{
  const params=new URLSearchParams({kind,search,page:String(page),academic_year_id:year||'0',grade_level_id:grade||'0'})
  if(!year) params.delete('academic_year_id')
  if(!grade) params.delete('grade_level_id')
- api<Page<Option>>(endpoint+'?'+params).then(v=>{if(alive){setResult(v);setError('')}}).catch(e=>{if(alive)setError(errorMessage(e))})
+ api<Page<Option>>(endpoint+'?'+params).then(v=>{if(alive){setResult(v);setError('');setSettled(requestKey)}}).catch(e=>{if(alive){setResult(null);setError(errorMessage(e));setSettled(requestKey)}})
  },200)
  return ()=>{alive=false;clearTimeout(timer)}
- },[kind,search,page,year,grade,revision,endpoint])
- return <fieldset className="min-w-0 rounded-xl border border-beige p-3"><legend className="text-sm font-semibold">{label}</legend><input className="institutional-field mb-2 w-full" aria-label={'Buscar '+label} value={search} placeholder="Buscar" onChange={e=>{setSearch(e.target.value);setPage(1)}}/><select className="institutional-field w-full" name={name} required value={value} onChange={e=>onChange(e.target.value)}><option value="">Seleccionar</option>{value&&!result?.data.some(o=>String(o.id)===value)&&<option value={value}>Selección actual #{value}</option>}{result?.data.map(o=><option key={o.id} value={o.id}>{o.name}{kind==='sections'&&o.occupied!==undefined?' — '+o.occupied+'/'+(o.capacity??'sin límite')+' estudiantes':''}</option>)}</select><Message error>{error}</Message><Pager page={result} onPage={setPage}/></fieldset>
+ },[kind,search,page,year,grade,revision,endpoint,requestKey])
+ return <fieldset className="min-w-0 rounded-xl border border-beige p-3"><legend className="text-sm font-semibold">{label}</legend><input id={name+'-search'} className="institutional-field mb-2 w-full" aria-label={'Buscar '+label} value={search} placeholder="Buscar" onChange={e=>{setSearch(e.target.value);setPage(1)}}/><label className="sr-only" htmlFor={name}>{label}</label><select id={name} disabled={loading} aria-invalid={invalid||undefined} aria-describedby={errorId} className="institutional-field w-full" name={name} required value={value} onChange={e=>{onChange(e.target.value);onSelect?.(result?.data.find(o=>String(o.id)===e.target.value))}}><option value="">Seleccionar</option>{value&&!result?.data.some(o=>String(o.id)===value)&&<option value={value}>Selección actual #{value}</option>}{result?.data.map(o=><option key={o.id} value={o.id}>{o.name}{kind==='sections'&&o.occupied!==undefined?' — '+o.occupied+'/'+(o.capacity??'sin límite')+' estudiantes':''}</option>)}</select><Message error>{!loading&&error}</Message>{loading&&<p role="status">Cargando opciones…</p>}{!loading&&result?.data.length===0&&!error&&<p role="status">{kind==='sections'?'No hay secciones disponibles para esta consulta.':'No hay opciones para esta consulta.'}</p>}<Pager page={result} onPage={setPage}/></fieldset>
 }
