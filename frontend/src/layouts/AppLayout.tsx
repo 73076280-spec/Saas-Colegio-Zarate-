@@ -30,7 +30,7 @@ export default function AppLayout() {
   if (Object.keys(catalogs).some(key => user.permissions.includes(key+'.view'))) links.push(['/app/academic','Gesti\u00f3n Acad\u00e9mica',''])
   if (['students','teachers','guardians'].some(type => user.permissions.includes(type+'.view'))) links.push(['/app/people','Personas',''])
   if (enrollmentAccess(user)) links.push(['/app/enrollments','Centro de Matrículas',''])
-  if (user.permissions.includes('payments.view')) links.push(['/app/payments','Tesorería','payments.view'])
+  if (user.permissions.includes('payments.view')) links.push(['/app/treasury','Centro de Tesorería','payments.view'])
   if (user.permissions.includes('teacher-assignments.view')) links.push(['/app/teacher-assignments','Asignación docente','teacher-assignments.view'])
   if (user.permissions.includes('courses.view')) links.push(['/app/courses','Cursos','courses.view'])
   if (user.roles.some(r=>['TEACHER','STUDENT'].includes(r))) links.push(['/app/my-courses','Mis cursos',''])
@@ -48,7 +48,7 @@ export default function AppLayout() {
   if (user.roles.some(role => ['ADMINISTRATOR','SECRETARY','TREASURY','TEACHER'].includes(role))) links.push(['/app/reports','Reportes',''])
   const visibleLinks = links.filter(([, , permission]) => !permission || user.permissions.includes(permission))
   const current = [...visibleLinks].sort((a,b) => b[0].length - a[0].length).find(([path]) => location.pathname === path || location.pathname.startsWith(path + '/'))
-  const group = (path: string) => /^\/app\/(users|institution|roles|audit)$/.test(path) ? 'Administración' : /requests|documents|communications|notifications|payments|justifications/.test(path) ? 'Gestión y comunidad' : path === '/app' || path === '/app/profile' ? 'Mi espacio' : 'Vida académica'
+  const group = (path: string) => /^\/app\/(users|institution|roles|audit)$/.test(path) ? 'Administración' : /requests|documents|communications|notifications|payments|treasury|justifications/.test(path) ? 'Gestión y comunidad' : path === '/app' || path === '/app/profile' ? 'Mi espacio' : 'Vida académica'
   async function signOut() {
     setBusy(true); setError('')
     try { await logout(); navigate('/login', { replace: true }) }

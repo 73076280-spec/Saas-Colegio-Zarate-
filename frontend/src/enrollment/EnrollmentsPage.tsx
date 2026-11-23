@@ -1,3 +1,4 @@
+import EnrollmentForm from './EnrollmentForm'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api, errorMessage } from '../api/client'
@@ -5,19 +6,8 @@ import { useAuth } from '../auth/AuthContext'
 import { Message, PageHeading } from '../components/Form'
 import { enrollmentStates, labels, Lookup, Pager, Status } from './shared'
 import type { Page } from './shared'
-type Enrollment={id:number;enrollment_code:string;student_id:number;academic_year_id:number;grade_level_id:number;section_id:number;status:string;observations:string|null;enrolled_at:string|null;student:{name:string};academic_year:{name:string};grade_level:{name:string;level:string};section:{name:string;capacity:number|null};history?:{id:number;previous_status:string|null;new_status:string;actor:string;comment:string|null;created_at:string}[]}
+export type Enrollment={id:number;enrollment_code:string;student_id:number;academic_year_id:number;grade_level_id:number;section_id:number;status:string;observations:string|null;enrolled_at:string|null;student:{name:string};academic_year:{name:string};grade_level:{name:string;level:string};section:{name:string;capacity:number|null};history?:{id:number;previous_status:string|null;new_status:string;actor:string;comment:string|null;created_at:string}[]}
 const actions:Record<string,{label:string;states:string[]}>={submit:{label:'Enviar',states:['DRAFT','OBSERVED']},observe:{label:'Observar',states:['PENDING']},approve:{label:'Aprobar',states:['PENDING']},reject:{label:'Rechazar',states:['PENDING']},cancel:{label:'Cancelar matrícula',states:['APPROVED']}}
-function EnrollmentForm({record,onSaved,onCancel}:{record:Enrollment|null;onSaved:(e:Enrollment)=>void;onCancel:()=>void}) {
- const [student,setStudent]=useState(String(record?.student_id??'')),[year,setYear]=useState(String(record?.academic_year_id??'')),[grade,setGrade]=useState(String(record?.grade_level_id??'')),[section,setSection]=useState(String(record?.section_id??'')),[observations,setObservations]=useState(record?.observations??''),[error,setError]=useState(''),[busy,setBusy]=useState(false)
- return <form className="institutional-card my-6 space-y-4" onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');try{const r=await api<{data:Enrollment}>('/api/v1/enrollments'+(record?'/'+record.id:''),record?'PATCH':'POST',{student_id:Number(student),academic_year_id:Number(year),grade_level_id:Number(grade),section_id:Number(section),observations});onSaved(r.data)}catch(e){setError(errorMessage(e))}finally{setBusy(false)}}}>
- <h2 className="text-xl font-semibold">{record?'Editar matrícula':'Nueva matrícula'}</h2><div className="grid gap-4 md:grid-cols-2">
- {record?<p>Estudiante: {record.student.name}</p>:<Lookup label="Estudiante" name="student_id" kind="students" value={student} onChange={setStudent}/>}
- <Lookup label="Año académico" name="academic_year_id" kind="years" value={year} onChange={v=>{setYear(v);setGrade('');setSection('')}}/>
- {year&&<Lookup label="Grado" name="grade_level_id" kind="grades" year={year} value={grade} onChange={v=>{setGrade(v);setSection('')}}/>}
- {year&&grade&&<Lookup label="Sección" name="section_id" kind="sections" year={year} grade={grade} value={section} onChange={setSection}/>}</div>
- <label className="grid gap-2">Observaciones<textarea className="institutional-field" name="observations" maxLength={2000} value={observations} onChange={e=>setObservations(e.target.value)}/></label>
- <Message error>{error}</Message><div className="flex flex-wrap gap-3"><button className="institutional-button" disabled={busy||!section}>Guardar matrícula</button><button type="button" className="institutional-button" onClick={onCancel}>Cerrar formulario</button></div></form>
-}
 export default function EnrollmentsPage({initialCreate=false,historyOnly=false}:{initialCreate?:boolean;historyOnly?:boolean}) {
  const [params]=useSearchParams()
  const {user}=useAuth(),can=(p:string)=>user?.permissions.includes('enrollments.'+p),manage=can('view')
@@ -27,8 +17,8 @@ export default function EnrollmentsPage({initialCreate=false,historyOnly=false}:
  async function show(id:number){setDetail(null);try{setDetail((await api<{data:Enrollment}>('/api/v1/enrollments/'+id)).data);setComment('')}catch(e){setError(errorMessage(e))}}
  return <><PageHeading title={historyOnly?'Historial de matrículas':manage?'Matrículas':'Mi matrícula'} description={historyOnly?'Selecciona Detalle para consultar los cambios de estado de una matrícula.':manage?'Gestiona el trámite, los requisitos y la aprobación institucional.':'Consulta las matrículas propias o de tus estudiantes asociados.'}/>
  {filters.academic_year_id&&<p className="mb-4 text-sm text-brown-medium">Consulta filtrada por el año académico seleccionado.</p>}
- {!historyOnly&&can('create')&&<button className="institutional-button" onClick={()=>setForm({record:null})}>Nueva matrícula</button>}
- {form&&<EnrollmentForm record={form.record} onCancel={()=>setForm(null)} onSaved={r=>{setForm(null);setRevision(v=>v+1);void show(r.id)}}/>}
+ {!historyOnly&&!form&&can('create')&&<button className="institutional-button" onClick={()=>setForm({record:null})}>Nueva matrícula</button>}
+ {form&&<EnrollmentForm record={form.record} onCancel={()=>{setForm(null);setRevision(v=>v+1)}} onSaved={r=>{setForm(null);setRevision(v=>v+1);void show(r.id)}}/>}
  <form className="my-5 flex flex-wrap gap-3" onSubmit={e=>{e.preventDefault();setQuery(search);setPage(1)}}><input className="institutional-field min-w-0" aria-label="Buscar matrícula" placeholder="Código o estudiante" value={search} onChange={e=>setSearch(e.target.value)}/><select className="institutional-field" aria-label="Estado de matrícula" value={status} onChange={e=>{setStatus(e.target.value);setPage(1)}}><option value="">Todos los estados</option>{enrollmentStates.map(s=><option key={s} value={s}>{labels[s]}</option>)}</select><button className="institutional-button">Buscar</button></form>
  {(can('create')||can('update'))&&<details className="my-4"><summary className="cursor-pointer font-semibold">Filtros académicos</summary><div className="mt-4 grid gap-4 md:grid-cols-2"><Lookup label="Filtrar estudiante" name="filter_student" kind="students" value={filters.student_id} onChange={v=>{setFilters({...filters,student_id:v});setPage(1)}}/><Lookup label="Filtrar año" name="filter_year" kind="years" value={filters.academic_year_id} onChange={v=>{setFilters({...filters,academic_year_id:v,grade_level_id:'',section_id:''});setPage(1)}}/>{filters.academic_year_id&&<Lookup label="Filtrar grado" name="filter_grade" kind="grades" year={filters.academic_year_id} value={filters.grade_level_id} onChange={v=>{setFilters({...filters,grade_level_id:v,section_id:''});setPage(1)}}/>}{filters.grade_level_id&&<Lookup label="Filtrar sección" name="filter_section" kind="sections" year={filters.academic_year_id} grade={filters.grade_level_id} value={filters.section_id} onChange={v=>{setFilters({...filters,section_id:v});setPage(1)}}/>}</div><button className="institutional-button mt-3" onClick={()=>{setFilters({academic_year_id:'',grade_level_id:'',section_id:'',student_id:''});setPage(1)}}>Limpiar filtros académicos</button></details>}
  <Message error>{error}</Message>{loading&&<p role="status">Cargando matrículas…</p>}

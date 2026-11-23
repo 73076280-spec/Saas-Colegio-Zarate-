@@ -12,6 +12,8 @@ import EnrollmentLayout from './enrollment/EnrollmentLayout'
 import EnrollmentDashboard from './enrollment/EnrollmentDashboard'
 import EnrollmentCapacity from './enrollment/EnrollmentCapacity'
 import PaymentsPage from './enrollment/PaymentsPage'
+import TreasuryLayout, { LegacyPaymentsRedirect } from './treasury/TreasuryLayout'
+import TreasuryDashboard from './treasury/TreasuryDashboard'
 import PeopleHome from './people/PeopleHome'
 import PeoplePage from './people/PeoplePage'
 import AcademicHome from './academic/AcademicHome'
@@ -82,7 +84,13 @@ export default function App() {
           <Route path="capacity" element={<EnrollmentCapacity />} />
           <Route path="history" element={<EnrollmentsPage key="history" historyOnly />} />
         </Route>
-        <Route path="payments" element={<Protected permission="payments.view"><PaymentsPage /></Protected>} />
+        <Route path="treasury" element={<Protected permission="payments.view"><TreasuryLayout /></Protected>}>
+          <Route index element={<TreasuryDashboard />} />
+          <Route path="payments" element={<PaymentsPage key="treasury-payments" view="payments" center />} />
+          <Route path="concepts" element={<PaymentsPage key="treasury-concepts" view="concepts" center />} />
+          <Route path="history" element={<PaymentsPage key="treasury-history" view="history" center />} />
+        </Route>
+        <Route path="payments" element={<Protected permission="payments.view"><LegacyPaymentsRedirect /></Protected>} />
         <Route path="academic" element={<Protected><AcademicHome /></Protected>} />
         <Route path="academic/:catalog" element={<Protected><AcademicPage /></Protected>} />
         <Route path="people" element={<Protected><PeopleHome /></Protected>} />
