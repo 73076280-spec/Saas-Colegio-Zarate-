@@ -11,6 +11,12 @@ function total(data: CountPage | null): number | null {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : null
 }
 
+function indicatorNote(item: { loading: boolean; error: string; value: number | null; note: string }): string {
+  if (item.loading) return 'Consultando…'
+  if (item.error || item.value === null) return 'Dato no disponible'
+  return item.note
+}
+
 export default function TreasuryDashboard() {
   const { user } = useAuth()
   const [revision, setRevision] = useState(0)
@@ -36,7 +42,7 @@ export default function TreasuryDashboard() {
     <div className="treasury-metrics" aria-busy={loading}>{indicators.map((item, index) => <section className="metric-card" key={item.label} aria-label={item.label} aria-busy={item.loading}>
       <div className="flex items-start justify-between gap-3"><h2 className="text-sm font-semibold text-brown-medium">{item.label}</h2><span className="metric-icon"><Icon name={item.icon} /></span></div>
       <p className="treasury-number" data-testid={'treasury-count-' + index}>{item.loading || item.error || item.value === null ? '—' : item.value.toLocaleString('es-PE')}</p>
-      <p className="text-sm text-brown-medium">{item.loading ? 'Consultando…' : item.error || item.value === null ? 'Dato no disponible' : item.note}</p>
+      <p className="text-sm text-brown-medium">{indicatorNote(item)}</p>
       <Link className="treasury-detail-link" to={'/app/treasury' + item.path}>Ver detalle<Icon name="arrow" className="size-4" /></Link>
     </section>)}</div>
     <p className="text-sm text-brown-medium">El resumen muestra los registros autorizados por el servidor. Los conceptos se cuentan en todos sus estados; el total de conceptos activos y las obligaciones no están disponibles como indicadores agregados.</p>
